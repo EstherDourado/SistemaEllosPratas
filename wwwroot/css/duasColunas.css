@@ -1,0 +1,36 @@
+﻿/* Controla o container principal que divide a tela */
+.catalogo-container {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem; /* Espaçamento entre as colunas */
+}
+
+/* Coluna da esquerda para os produtos */
+.coluna-produtos {
+    flex: 1; /* Faz esta coluna ocupar todo o espaço disponível */
+    min-width: 0; /* Previne que a coluna encolha demais */
+}
+
+/* Coluna da direita para o carrinho */
+.coluna-carrinho {
+    width: 350px; /* Largura fixa do carrinho */
+    /* 'position: sticky' faz o elemento "grudar" no topo quando a página rola */
+    position: sticky;
+    top: 20px; /* Distância do topo ao "grudar" */
+    /* Define uma altura máxima para que ele não ultrapasse a tela */
+    align-self: flex-start; /* Alinha o item no início do container flexível */
+}
+
+/* Media query para telas menores (tablets e celulares) */
+@@media (max-width: 992px) {
+    .catalogo-container {
+        /* Em telas pequenas, as colunas ficam uma sobre a outra */
+        flex-direction: column;
+    }
+
+    .coluna-carrinho {
+        width: 100%; /* Ocupa a largura total */
+        position: relative; /* Remove o efeito "sticky" */
+        top: 0;
+    }
+}

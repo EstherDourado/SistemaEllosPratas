@@ -1,0 +1,105 @@
+/* Paleta de cores claras */
+:root {
+    --color-background: #f8f9fa;    /* Fundo principal (branco acinzentado) */
+    --color-surface: #ffffff;        /* Superfícies como a barra superior (branco puro) */
+    --color-sidebar-bg: #e9ecef;    /* Fundo do menu (cinza claro) */
+    --color-text-primary: #212529;  /* Texto principal (preto/cinza escuro) */
+    --color-border: #dee2e6;        /* Bordas (cinza sutil) */
+    --color-hover-bg: #ced4da;      /* Fundo do item de menu ao passar o mouse */
+}
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    margin: 0;
+    font-family: sans-serif;
+}
+
+/* Menu lateral fixo */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background-color: var(--color-sidebar-bg); /* Cor de fundo clara para o menu */
+    color: var(--color-text-primary);           /* Cor do texto escura para legibilidade */
+    overflow-y: auto;
+    padding-top: 20px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    border-right: 1px solid var(--color-border); /* Linha sutil para separar do conteúdo */
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar ul li {
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border); /* Borda sutil */
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.sidebar ul li:hover {
+    background-color: var(--color-hover-bg); /* Efeito hover */
+}
+
+.sidebar ul li span {
+    float: right;
+}
+
+/* Submenu */
+.sidebar ul ul {
+    display: none;
+    background-color: var(--color-sidebar-bg);
+}
+
+.sidebar ul li.active > ul {
+    display: block;
+}
+
+.sidebar ul ul li {
+    padding: 15px 15px 15px 30px; /* Ajuste no padding */
+    border-bottom: none;
+}
+
+/* Conteúdo ao lado do menu */
+.main-content {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Barra superior */
+.topbar {
+    background-color: var(--color-surface); /* Fundo branco */
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.search-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    outline: none;
+    font-size: 16px;
+}
+
+/* Hero de exemplo */
+.hero {
+    padding: 40px;
+    color: var(--color-text-primary); /* Texto escuro */
+}

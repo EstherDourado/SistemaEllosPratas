@@ -1,0 +1,59 @@
+/* menu2.css */
+body {
+    display: block;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    justify-content: center;
+}
+
+.menu__logo {
+    margin-bottom: 2rem;
+}
+
+.menu__logo-image {
+    max-width: 120px;
+    height: auto;
+    border-radius: 50%;
+}
+
+.menu__card {
+    background-color: var(--color-card);
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+    box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+.menu__title {
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.menu__options {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.menu__option {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+
+    .menu__option:hover {
+        background-color: var(--color-primary-hover);
+    }

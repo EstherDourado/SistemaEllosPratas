@@ -1,0 +1,98 @@
+﻿<!-- index.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ellos Pratas - Login & Registro</title>
+    <link rel="stylesheet" href="~/css/root.css">
+    <link rel="stylesheet" href="~/css/login_register.css"/>
+</head>
+<body>
+
+    <div class="auth">
+        <div class="auth__logo">
+            <img src="img/logo.png" alt="Ellos Pratas Logo" class="auth__logo-image">
+        </div>
+
+        <div class="auth__card">
+            <!-- Login Form -->
+            <form class="auth_form auth_form--active" id="login-form">
+                <h2 class="auth__title">Login</h2>
+
+                <div class="auth__field">
+                    <label for="login-username" class="auth__label">Usuário</label>
+                    <input type="text" id="login-username" placeholder="CPF" class="auth__input">
+                </div>
+
+                <div class="auth__field">
+                    <label for="login-password" class="auth__label">Senha</label>
+                    <input type="password" id="login-password" placeholder="••••••••" class="auth__input">
+                </div>
+
+                <button type="submit" class="auth__button">LOGIN</button>
+
+                <div class="auth__links">
+                    <p class="auth__text">
+                        Não tem conta? <span class="auth__link" onclick="switchForm('register')">Registre-se</span>
+                    </p>
+                    <span class="auth__link">Esqueceu sua senha?</span>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth__form" id="register-form">
+                <h2 class="auth__title">Cadastra-se</h2>
+
+                <div class="auth__field">
+                    <label for="register-username" class="auth__label">Usuário</label>
+                    <input type="text" id="register-username" placeholder="CPF" class="auth__input">
+                </div>
+
+                <div class="auth__field">
+                    <label for="register-password" class="auth__label">Senha</label>
+                    <input type="password" id="register-password" placeholder="••••••••" class="auth__input">
+                </div>
+
+                <div class="auth__field">
+                    <label for="register-confirm" class="auth__label">Confirmar Senha</label>
+                    <input type="password" id="register-confirm" placeholder="••••••••" class="auth__input">
+                </div>
+
+                <button type="submit" class="auth__button">Registro</button>
+
+                <div class="auth__links">
+                    <p class="auth__text">
+                        Já possui conta? <span class="auth__link" onclick="switchForm('login')">Faça login</span>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @* <script src="js/main.js"></script> *@
+   
+    <script>
+        // Função para alternar entre os formulários de login e registro
+        function switchForm(form) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+
+            if (form === 'register') {
+                loginForm.classList.remove('auth__form--active');
+                registerForm.classList.add('auth__form--active');
+            } else {
+                registerForm.classList.remove('auth__form--active');
+                loginForm.classList.add('auth__form--active');
+            }
+        }
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        // TODO: Validate login here
+        window.location.href = 'menu.html'; // Redirect to menu
+        // window.location.href = 'menu2.html'; // Redirect to menu
+        });
+    </script> 
+</body>
+</html>

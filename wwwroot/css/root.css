@@ -1,0 +1,23 @@
+/* wwwroot\css\root.css */
+:root {
+    --color-background: #f8f9fa; /* Um branco levemente acinzentado para o fundo */
+    --color-sidebar-bg: #e9ecef; /* Cinza claro para o menu, como o da logo */
+    --color-topbar-bg: #ffffff; /* Branco para a barra superior */
+    --color-text-primary: #212529; /* Preto para o texto principal, garantindo contraste */
+    --color-border: #dee2e6; /* Cinza para bordas sutis */
+    --color-hover-bg: #ced4da; /* Um cinza um pouco mais escuro para o efeito hover */
+}
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    margin: 0;
+    font-family: sans-serif; /* Adicionado para melhor legibilidade */
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}

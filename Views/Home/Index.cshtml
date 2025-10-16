@@ -1,0 +1,138 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Menu Lateral Fixo</title>
+    <link rel="stylesheet" href="~/css/root.css">
+    <link rel="stylesheet" href="~/css/menu.css">
+</head>
+<body>
+
+    <!-- Menu lateral fixo -->
+    <div class="sidebar" id="sidebar">
+        <ul>
+            <li class="menu-item" data-menu="cadastro">
+                Cadastro <span>▶</span>
+            </li>
+            <li class="menu-item" data-menu="estoque">
+                Estoque <span>▶</span>
+            </li>
+            <li class="menu-item" data-menu="vendas">
+                Vendas <span>▶</span>
+            </li>
+            <li class="menu-item" data-menu="caixa">
+                Caixa <span>▶</span>
+            </li>
+            <li class="menu-item" data-menu="relatorios">
+                Relatórios <span>▶</span>
+            </li>
+            <li class="menu-item" data-menu="configuracoes">
+                Configurações <span>▶</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Submenu expandido -->
+    <div class="submenu" id="submenu" style="display:none; position:fixed; left:260px; top:0; background:#fff; min-width:200px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+        <ul id="submenu-list" class="list-unstyled p-3"></ul>
+    </div>
+
+    <!-- Conteúdo principal -->
+    <div class="main-content" style="margin-left: 260px;">
+        <!-- Barra superior -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+            <div class="container-fluid">
+                <form class="d-flex ms-auto">
+                    <input class="form-control me-2" type="search" placeholder="Pesquisar" aria-label="Pesquisar">
+                    <button class="btn btn-outline-primary" type="submit">Buscar</button>
+                </form>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <div class="container">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h1 class="card-title mb-3">Bem-vindo ao Sistema</h1>
+                    <p class="card-text">Aqui vai o conteúdo principal do seu dashboard ou tela inicial.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const submenuData = {
+            cadastro: [
+                { text: "Produto", url: "/Produtos/Cadastrar" },
+                { text: "Edição de Produtos", url: "/Produtos/Editar" },
+                { text: "Cliente", url: "/Clientes/Cadastrar" },
+                { text: "Funcionário", url: "#" },
+                { text: "Fornecedor", url: "#" }
+            ],
+            estoque: [
+                { text: "Produtos", url: "/Produtos/Index" }
+                
+            ],
+            vendas: [
+                { text: "Registrar venda", url: "/Vendas/RegistrarVenda" },
+                { text: "Vendas em aberto", url: "#" },
+                { text: "Relatório de vendas", url: "#" },
+                { text: "Devolução / Troca", url: "#" }
+            ],
+            caixa: [
+                { text: "Abertura de caixa", url: "#" },
+                { text: "Fechamento de caixa", url: "#" },
+                { text: "Fluxo de caixa", url: "#" },
+                { text: "Sangria / Suprimento", url: "#" },
+                { text: "Contas a receber", url: "#" },
+                { text: "Contas a pagar", url: "#" }
+            ],
+            relatorios: [
+                { text: "Relatório de vendas", url: "#" },
+                { text: "Relatório financeiro", url: "#" },
+                { text: "Relatório de estoque", url: "#" },
+                { text: "Relatório de clientes", url: "#" },
+                { text: "Relatório de funcionários", url: "#" }
+            ],
+            configuracoes: [
+                { text: "Empresa", url: "#" },
+                { text: "Usuários e permissões", url: "#" },
+                { text: "Métodos de pagamento", url: "#" },
+                { text: "Integrações", url: "#" }
+            ]
+        };
+
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function () {
+                const menu = this.getAttribute('data-menu');
+                const submenu = document.getElementById('submenu');
+                const submenuList = document.getElementById('submenu-list');
+                submenuList.innerHTML = '';
+                submenuData[menu].forEach(opt => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.textContent = opt.text;
+                    a.href = opt.url;
+                    a.className = "mb-2 d-block text-decoration-none text-dark";
+                    li.appendChild(a);
+                    submenuList.appendChild(li);
+                });
+                submenu.style.display = 'block';
+                submenu.style.top = this.offsetTop + 'px';
+            });
+        });
+
+        // Esconde submenu ao clicar fora
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.menu-item') && !e.target.closest('#submenu')) {
+                document.getElementById('submenu').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

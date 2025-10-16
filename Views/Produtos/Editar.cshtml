@@ -1,0 +1,133 @@
+﻿@using EllosPratas.Dto;
+@using EllosPratas.Services.Categoria
+@model ProdutosEdicaoDto
+
+@inject ICategoriasInterface CategoriasServices
+
+@{
+    ViewData["Title"] = "Editar Produto";
+    string formAction = Url.Action("Editar", "Produtos");
+
+    var imagemPadrao = Url.Content("~/imagens/produto_padrao.png");
+    var categorias = CategoriasServices.GetCategorias().Result;
+    var categoriaAtual = categorias.FirstOrDefault(c => c.id_categoria == Model.id_categoria);
+}
+
+<!-- Referências de CSS e JS -->
+
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">@ViewData["Title"]</h4>
+        </div>
+        <div class="card-body">
+            <form id="produtosForm" action="@formAction" method="post" enctype="multipart/form-data">
+
+                <input type="hidden" asp-for="id_produto" />
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="nome_produto" class="form-label"></label>
+                            <input asp-for="nome_produto" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="descricao" class="form-label"></label>
+                            <textarea asp-for="descricao" class="form-control" rows="2" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="valor_unitario" class="form-label">Preço de Venda</label>
+                                <input asp-for="valor_unitario" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="quantidade" class="form-label">Quantidade em Estoque</label>
+                                <input asp-for="quantidade" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="id_categoria" class="form-label">Categoria</label>
+                            <select asp-for="id_categoria" class="form-control" style="width:100%" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="ativo" class="form-label"></label>
+                            <select asp-for="ativo" class="form-select" required>
+                                <option value="true">Sim</option>
+                                <option value="false">Não</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <label for="imagem">
+                                <img id="imgPreview" src="@(ViewBag.ImagemAtualBase64 != null ? $"data:image/png;base64,{ViewBag.ImagemAtualBase64}" : imagemPadrao)" class="img-thumbnail" style="width:200px; height: 200px; object-fit: cover; cursor:pointer;" alt="Imagem do Produto" />
+                            </label>
+                        </div>
+                        <div class="mb-3 mt-2">
+                            <label for="imagem" class="form-label">Trocar Imagem</label>
+                            <input asp-for="imagem" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="@Url.Action("Index", "Produtos")" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            const selectCategoria = $('#id_categoria');
+
+            $('#valor_unitario').mask('#.##0,00', {reverse: true});
+            $('#quantidade').mask('0#');
+
+            $('#imagem').on("change", function(e) { /* ... Lógica da imagem ... */ });
+            $('#produtosForm').on('submit', function(e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                formData.set('valor_unitario', $('#valor_unitario').val().replace(/\./g, '').replace(',', '.'));
+
+                $.ajax({
+                    type: 'POST',
+                    url: $(this).attr('action'),
+                    data: formData,
+                    processData: false, contentType: false,
+                    success: function(response) {
+                        alert(response.message);
+                        if (response.success && response.redirectTo) {
+                            window.location.href = response.redirectTo;
+                        }
+                    },
+                    error: () => alert("Ocorreu um erro de comunicação.")
+                });
+            });
+
+            selectCategoria.select2({
+                placeholder: "Selecione ou digite para buscar",
+                allowClear: true,
+                ajax: { url: '/Categorias/Listar', dataType: 'json', delay: 250, processResults: (data) => ({ results: data }) }
+            });
+
+            var categoriaAtualNome = "@(categoriaAtual?.nome_categoria ?? "")";
+            if (categoriaAtualNome) {
+                var option = new Option(categoriaAtualNome, selectCategoria.val(), true, true);
+                selectCategoria.append(option).trigger('change');
+            }
+        });
+    </script>
+}

@@ -1,0 +1,361 @@
+﻿@using Microsoft.IdentityModel.Tokens
+@model IEnumerable<EllosPratas.Models.ProdutosModel>
+
+@{
+    ViewData["Title"] = "Catálogo de Produtos";
+    var imagemPadrao = Url.Content("~/imagens/produto_padrao.png");
+}
+
+@* Mensagens de feedback *@
+@if (TempData["MensagemSucesso"] != null)
+{
+    <div class="alert alert-success" role="alert">@TempData["MensagemSucesso"]</div>
+}
+@if (TempData["MensagemErro"] != null)
+{
+    <div class="alert alert-danger" role="alert">@TempData["MensagemErro"]</div>
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+<link rel="stylesheet" href="~/css/duasColunas.css" />
+<link rel="stylesheet" href="~/css/carrinhoFlutuante.css" />
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <h1 class="h2">Catálogo de Produtos</h1>
+        <a asp-action="Cadastrar" asp-controller="Produtos" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Adicionar Novo Produto
+        </a>
+    </div>
+
+    <!-- Filtros na parte superior -->
+    <div class="filtro-container mb-4">
+        <div class="row g-3">
+            <div class="col-md-6 col-lg-4">
+                <label for="filtro-nome" class="form-label"><b>Buscar por Nome</b></label>
+                <input type="text" id="filtro-nome" class="form-control" placeholder="Digite o nome do produto...">
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <label for="filtro-preco-min" class="form-label"><b>Faixa de Preço</b></label>
+                <div class="input-group">
+                    <span class="input-group-text">R$</span>
+                    <input type="number" id="filtro-preco-min" class="form-control" placeholder="Mínimo" min="0" step="0.01">
+                    <span class="input-group-text">até</span>
+                    <input type="number" id="filtro-preco-max" class="form-control" placeholder="Máximo" min="0" step="0.01">
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <label class="form-label d-block"><b>Status</b></label>
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="filtro-status" id="status-todos" value="" autocomplete="off" checked>
+                    <label class="btn btn-outline-secondary" for="status-todos">Todos</label>
+                    <input type="radio" class="btn-check" name="filtro-status" id="status-ativo" value="true" autocomplete="off">
+                    <label class="btn btn-outline-success" for="status-ativo">Ativos</label>
+                    <input type="radio" class="btn-check" name="filtro-status" id="status-inativo" value="false" autocomplete="off">
+                    <label class="btn btn-outline-danger" for="status-inativo">Inativos</label>
+                </div>
+            </div>
+            <div class="col-md-12 col-lg-10">
+                <label for="filtro-categorias" class="form-label"><b>Categorias</b></label>
+                <div id="filtro-categorias-container" class="p-2 rounded" style="max-height: 150px; overflow-y: auto; border: 1px solid #ced4da;">
+                    <span class="text-muted">Carregando categorias...</span>
+                </div>
+            </div>
+            <div class="col-md-12 col-lg-2 d-flex align-items-end">
+                <button id="btn-filtrar" class="btn btn-info w-100">
+                    <i class="fas fa-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container para as colunas de produtos e carrinho -->
+    <div class="catalogo-container">
+        <!-- Coluna da Esquerda (Produtos com Rolagem) -->
+        <div class="coluna-produtos">
+            <div id="resultado-produtos"></div>
+            <div id="container-carregar-mais" class="text-center mt-4" style="display: none;">
+                <button id="btn-carregar-mais" class="btn btn-outline-secondary">Carregar Mais Produtos</button>
+            </div>
+        </div>
+
+        <!-- Coluna da Direita (Carrinho Fixo) -->
+        <div class="coluna-carrinho">
+            <div id="carrinho-venda" class="carrinho-venda aberto" style="position: relative; transform: none; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-radius: 10px;">
+                <div class="carrinho-header">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Carrinho (<span id="carrinho-contador">0</span>)</h5>
+                </div>
+                <div class="carrinho-body">
+                    <div id="carrinho-itens-lista">
+                        <p class="text-muted text-center">O carrinho está vazio.</p>
+                    </div>
+                </div>
+                <div class="carrinho-footer">
+                    <div class="d-flex justify-content-between fw-bold mb-3">
+                        <span>Total:</span>
+                        <span id="carrinho-total">R$ 0,00</span>
+                    </div>
+                    <a href="@Url.Action("RegistrarVenda", "Vendas")" class="btn btn-success w-100">
+                        Ir para Pagamento <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let paginaAtual = 1;
+            const itensPorPagina = 10;
+            const imagemPadrao = '@imagemPadrao';
+            let debounceTimer;
+
+            let carrinho = JSON.parse(localStorage.getItem('carrinhoDeVendas')) || [];
+
+            function salvarCarrinho() {
+                localStorage.setItem('carrinhoDeVendas', JSON.stringify(carrinho));
+                renderizarCarrinho();
+            }
+
+
+            // Função para exibir notificações (toast)
+            function showToast(message, isError = false) {
+                const toast = $('#toast-notification');
+                toast.text(message).css('background-color', isError ? '#dc3545' : '#28a745');
+                toast.fadeIn();
+                setTimeout(() => toast.fadeOut(), 3000);
+            }
+
+            // Função para carregar as categorias e popular os checkboxes
+            function carregarCategorias() {
+                const container = $('#filtro-categorias-container');
+                $.get('/Categorias/Listar')
+                    .done(function (categorias) {
+                        container.empty();
+                        if (categorias && categorias.length > 0) {
+
+                            console.log("Categorias: ", categorias);
+                            categorias.forEach(cat => {
+                                const checkboxHtml = `
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filtro-categoria" type="checkbox" value="${cat.id}" id="cat-${cat.id}">
+                                        <label class="form-check-label" for="cat-${cat.id}">${cat.text}</label>
+                                    </div>`;
+                                container.append(checkboxHtml);
+                            });
+                        } else {
+                            container.html('<span class="text-muted">Nenhuma categoria ativa encontrada.</span>');
+                        }
+                    })
+                    .fail(() => container.html('<span class="text-danger">Erro ao carregar categorias.</span>'));
+            }
+
+            // Função principal para buscar e renderizar os produtos
+            function buscarProdutos(limparResultados = true) {
+                if (limparResultados) {
+                    paginaAtual = 1;
+                    $('#resultado-produtos').html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Buscando...</span></div></div>');
+                }
+
+                const precoMin = $('#filtro-preco-min').val();
+                const precoMax = $('#filtro-preco-max').val();
+
+                const filtroDto = {
+                    Nome: $('#filtro-nome').val(),
+                    PrecoMin: precoMin ? parseFloat(precoMin) : null,
+                    PrecoMax: precoMax ? parseFloat(precoMax) : null,
+                    Ativo: $('input[name="filtro-status"]:checked').val() === "" ? null : ($('input[name="filtro-status"]:checked').val() === "true"),
+                    CategoriasIds: $('.filtro-categoria:checked').map(function() { return parseInt($(this).val()); }).get(),
+                    Pagina: paginaAtual,
+                    ItensPorPagina: itensPorPagina
+                };
+
+                $.ajax({
+                    url: '/Produtos/Filtrar',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(filtroDto),
+                    success: function(response) {
+                        if (limparResultados) {
+                            $('#resultado-produtos').empty();
+                        }
+
+                        if (response.categorias.length === 0 && paginaAtual === 1) {
+                            $('#resultado-produtos').html('<div class="alert alert-warning text-center">Nenhum produto encontrado com os filtros selecionados.</div>');
+                            $('#container-carregar-mais').hide();
+                            return;
+                        }
+
+                        // CORREÇÃO: Utilizando os nomes de propriedade corretos do DTO (idCategoria, nomeCategoria)
+                        response.categorias.forEach(categoria => {
+                            let secaoCategoria = $(`#secao-cat-${categoria.idCategoria}`);
+
+                            // Se a seção da categoria ainda não existe na página, cria
+                            if (secaoCategoria.length === 0) {
+                                $('#resultado-produtos').append(`
+                                    <section id="secao-cat-${categoria.idCategoria}" class="mb-5">
+                                        <h2 class="display-6 border-bottom pb-2 mb-4">${categoria.nomeCategoria}</h2>
+                                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-3 g-4"></div>
+                                    </section>
+                                `);
+                                secaoCategoria = $(`#secao-cat-${categoria.idCategoria}`);
+                            }
+
+                            const containerProdutos = secaoCategoria.find('.row');
+
+                            // Renderiza cada produto individualmente
+                            categoria.produtos.forEach(produto => {
+                                const imagemSrc = produto.imagemBase64 ? `data:image/jpeg;base64,${produto.imagemBase64}` : imagemPadrao;
+
+
+                                // ATUALIZAÇÃO: HTML do card do produto
+                                const productCardHtml = `
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm d-flex flex-column">
+                                        <div class="position-absolute top-0 end-0 p-2" style="z-index: 10;">
+                                          ${produto.ativo ? '<span class="badge rounded-pill bg-success">Ativo</span>' : '<span class="badge rounded-pill bg-danger">Inativo</span>'}
+                                        </div>
+
+                                        <!-- ATUALIZAÇÃO: Wrapper para a imagem -->
+                                        <div class="ratio ratio-1x1">
+                                            <img src="${imagemSrc}" class="card-img-top" alt="${produto.nome_produto}" onerror="this.onerror=null;this.src='${imagemPadrao}';">
+                                        </div>
+
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title">${produto.nome_produto}</h5>
+                                            <p class="card-text text-muted small">${produto.descricao || ''}</p>
+                                            <div class="mt-auto">
+                                                <p class="card-text mb-1"><strong>Preço:</strong> <span class="text-success h5">R$ ${produto.valor_unitario.toFixed(2).replace('.', ',')}</span></p>
+                                                <p class="card-text mb-2"><strong>Estoque:</strong> ${produto.quantidade}</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- ATUALIZAÇÃO: Botões maiores (removida a classe 'btn-sm') e com ícones -->
+                                        <div class="card-footer d-flex justify-content-around align-items-center p-2">
+                                            <a href="/Produtos/Editar/${produto.id_produto}" class="btn btn-outline-primary" title="Editar"><i class="fas fa-edit"></i></a>
+                                            <button class="btn ${produto.ativo ? 'btn-outline-warning' : 'btn-outline-info'} btn-status" data-id="${produto.id_produto}" title="${produto.ativo ? 'Inativar' : 'Ativar'}">
+                                                <i class="fas ${produto.ativo ? 'fa-toggle-off' : 'fa-toggle-on'}"></i>
+                                            </button>
+                                            <button class="btn btn-success btn-add-venda" data-id="${produto.id_produto}" title="Adicionar ao Carrinho">
+                                                <i class="fas fa-cart-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>`;
+
+                                containerProdutos.append(productCardHtml);
+                            });
+                        });
+
+                        if (paginaAtual < response.totalPaginas) {
+                            $('#container-carregar-mais').show();
+                        } else {
+                            $('#container-carregar-mais').hide();
+                        }
+                    },
+                    error: function() {
+                        $('#resultado-produtos').html('<div class="alert alert-danger text-center">Ocorreu um erro ao buscar os produtos.</div>');
+                    }
+                });
+            }
+
+            // --- Event Handlers (Gatilhos de Ações) ---
+
+            // Filtrar ao clicar no botão
+            $('#btn-filtrar').on('click', () => buscarProdutos(true));
+
+            // Filtrar automaticamente ao digitar no campo de nome (com delay)
+            $('#filtro-nome').on('keyup', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => buscarProdutos(true), 500);
+            });
+
+            // Carregar mais produtos
+            $('#btn-carregar-mais').on('click', function() {
+                paginaAtual++;
+                buscarProdutos(false);
+            });
+
+            function adicionarAoCarrinho(produto) {
+                const itemExistente = carrinho.find(item => item.id_produto === produto.id_produto);
+                if (itemExistente) {
+                    itemExistente.quantidade++;
+                } else {
+                    carrinho.push({ ...produto, quantidade: 1 });
+                }
+                salvarCarrinho();
+                $('#carrinho-venda').addClass('aberto'); // Abre o carrinho ao adicionar item
+            }
+
+            function renderizarCarrinho() {
+                const lista = $('#carrinho-itens-lista');
+                lista.empty();
+                let total = 0;
+
+                if (carrinho.length === 0) {
+                    lista.html('<p class="text-muted text-center">O carrinho está vazio.</p>');
+                } else {
+                    carrinho.forEach(item => {
+                        const subtotal = item.quantidade * item.valor_unitario;
+                        total += subtotal;
+                        lista.append(`
+                            <div class="d-flex justify-content-between align-items-center mb-2 carrinho-item" data-id="${item.id_produto}">
+                                <div>
+                                    <div class="fw-bold">${item.nome_produto}</div>
+                                    <div>Qtd: ${item.quantidade} x R$ ${item.valor_unitario.toFixed(2).replace('.', ',')}</div>
+                                </div>
+                                <div class="fw-bold">R$ ${subtotal.toFixed(2).replace('.', ',')}</div>
+                            </div>
+                        `);
+                    });
+                }
+                $('#carrinho-contador').text(carrinho.length);
+                $('#carrinho-total').text(`R$ ${total.toFixed(2).replace('.', ',')}`);
+            }
+
+
+            // Ação para alterar status (Ativar/Inativar)
+            $('#resultado-produtos').on('click', '.btn-status', function() {
+                const produtoId = $(this).data('id');
+
+                $.ajax({
+                    url: `/Produtos/AlterarStatus?id=${produtoId}`,
+                    type: 'POST',
+                    success: function(response) {
+                        if(response.success) {
+                            showToast('Status do produto alterado com sucesso!');
+                            buscarProdutos(true); // Recarrega a lista para refletir a mudança
+                        } else {
+                            showToast(response.message || 'Não foi possível alterar o status.', true);
+                        }
+                    },
+                    error: function() {
+                         showToast('Erro de comunicação ao alterar status.', true);
+                    }
+                });
+            });
+
+            // Ação para adicionar ao carrinho (venda)
+            $('#resultado-produtos').on('click', '.btn-add-venda', function() {
+                const produtoId = $(this).data('id');
+                // Lógica futura: adicionar ao carrinho da tela de Vendas
+                showToast(`Produto ${produtoId} adicionado ao carrinho! (Simulação)`);
+                console.log(`Produto ${produtoId} adicionado para venda.`);
+            });
+
+            $('#carrinho-header').on('click', function() {
+                $('#carrinho-venda').toggleClass('minimizado');
+                const icone = $('#btn-minimizar-carrinho i');
+                icone.toggleClass('fa-chevron-down fa-chevron-up');
+            });
+
+            // --- Carga Inicial ---
+            carregarCategorias();
+            buscarProdutos(true);
+            renderizarCarrinho();
+        });
+    </script>
+}
