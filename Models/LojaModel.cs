@@ -7,8 +7,8 @@ namespace EllosPratas.Models
         [Key]
         public int id_loja { get; set; }
         public required string nome_loja { get; set; }
-        public required string id_endereco { get; set; } 
-        public required string telefone { get; set; }
+        public string id_endereco { get; set; } 
+        public string telefone { get; set; }
 
         public EnderecoModel Endereco { get; set; } // Relação 1-para-1
         public List<FuncionarioModel> Funcionarios { get; set; } = new List<FuncionarioModel>();

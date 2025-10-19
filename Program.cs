@@ -1,24 +1,40 @@
 using EllosPratas.Data;
+using EllosPratas.Services.CarrinhoVenda;
 using EllosPratas.Services.Categoria;
+using EllosPratas.Services.Loja;
 using EllosPratas.Services.Produtos;
 using EllosPratas.Services.Venda;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-
+// Adiciona os serviços do MVC e o suporte ao Newtonsoft.Json
+builder.Services.AddControllersWithViews()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
 //Conectando ao banco de dados SQL Server
 builder.Services.AddDbContext<BancoContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//Configurando a injeção de dependência
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // O carrinho expira após 30 min de inatividade
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
-builder.Services.AddScoped<IProdutosInterface, ProdutosServices>();
+builder.Services.AddHttpContextAccessor();
+
+
+//Configurando a injeção de dependência
+builder.Services.AddScoped<IProdutosInterface, ProdutosService>();
 builder.Services.AddScoped<IClientesInterface, ClienteService>();
 builder.Services.AddScoped<ICategoriasInterface, CategoriasServices>();
+builder.Services.AddScoped<ICarrinhoInterface, CarrinhoServices>();
 builder.Services.AddScoped<IVendasInterface, VendasServices>();
+builder.Services.AddScoped<ILojaInterface, LojaService>();
 
 var app = builder.Build();
 
@@ -32,10 +48,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
+app.UseSession();
+
 
 app.MapControllerRoute(
     name: "default",

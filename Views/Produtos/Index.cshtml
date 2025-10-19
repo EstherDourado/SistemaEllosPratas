@@ -113,14 +113,6 @@
             const imagemPadrao = '@imagemPadrao';
             let debounceTimer;
 
-            let carrinho = JSON.parse(localStorage.getItem('carrinhoDeVendas')) || [];
-
-            function salvarCarrinho() {
-                localStorage.setItem('carrinhoDeVendas', JSON.stringify(carrinho));
-                renderizarCarrinho();
-            }
-
-
             // Função para exibir notificações (toast)
             function showToast(message, isError = false) {
                 const toast = $('#toast-notification');
@@ -262,7 +254,6 @@
                 });
             }
 
-            // --- Event Handlers (Gatilhos de Ações) ---
 
             // Filtrar ao clicar no botão
             $('#btn-filtrar').on('click', () => buscarProdutos(true));
@@ -279,61 +270,30 @@
                 buscarProdutos(false);
             });
 
-            function adicionarAoCarrinho(produto) {
-                const itemExistente = carrinho.find(item => item.id_produto === produto.id_produto);
-                if (itemExistente) {
-                    itemExistente.quantidade++;
-                } else {
-                    carrinho.push({ ...produto, quantidade: 1 });
-                }
-                salvarCarrinho();
-                $('#carrinho-venda').addClass('aberto'); // Abre o carrinho ao adicionar item
+            function carregarCarrinho() {
+                $('#carrinho-venda').load('@Url.Action("ObterCarrinhoPartial", "Carrinho")');
             }
-
-            function renderizarCarrinho() {
-                const lista = $('#carrinho-itens-lista');
-                lista.empty();
-                let total = 0;
-
-                if (carrinho.length === 0) {
-                    lista.html('<p class="text-muted text-center">O carrinho está vazio.</p>');
-                } else {
-                    carrinho.forEach(item => {
-                        const subtotal = item.quantidade * item.valor_unitario;
-                        total += subtotal;
-                        lista.append(`
-                            <div class="d-flex justify-content-between align-items-center mb-2 carrinho-item" data-id="${item.id_produto}">
-                                <div>
-                                    <div class="fw-bold">${item.nome_produto}</div>
-                                    <div>Qtd: ${item.quantidade} x R$ ${item.valor_unitario.toFixed(2).replace('.', ',')}</div>
-                                </div>
-                                <div class="fw-bold">R$ ${subtotal.toFixed(2).replace('.', ',')}</div>
-                            </div>
-                        `);
-                    });
-                }
-                $('#carrinho-contador').text(carrinho.length);
-                $('#carrinho-total').text(`R$ ${total.toFixed(2).replace('.', ',')}`);
-            }
-
 
             // Ação para alterar status (Ativar/Inativar)
-            $('#resultado-produtos').on('click', '.btn-status', function() {
+            $('#resultado-produtos').on('click', '.btn-add-venda', function() {
                 const produtoId = $(this).data('id');
+                const button = $(this);
+                button.prop('disabled', true); // Desabilita o botão para evitar cliques duplos
 
                 $.ajax({
-                    url: `/Produtos/AlterarStatus?id=${produtoId}`,
                     type: 'POST',
+                    url: '@Url.Action("Adicionar", "Carrinho")',
+                    data: { produtoId: produtoId },
                     success: function(response) {
-                        if(response.success) {
-                            showToast('Status do produto alterado com sucesso!');
-                            buscarProdutos(true); // Recarrega a lista para refletir a mudança
-                        } else {
-                            showToast(response.message || 'Não foi possível alterar o status.', true);
-                        }
+                        $('#carrinho-venda').html(response);
+                        console.log("Produto adicionado com sucesso!");
                     },
                     error: function() {
-                         showToast('Erro de comunicação ao alterar status.', true);
+                        alert("Erro ao adicionar o produto ao carrinho.");
+                        console.log("Erro ao adicionar o produto ao carrinho!");
+                    },
+                    complete: function(){
+                        button.prop('disabled', false); // Reabilita o botão
                     }
                 });
             });
@@ -346,16 +306,10 @@
                 console.log(`Produto ${produtoId} adicionado para venda.`);
             });
 
-            $('#carrinho-header').on('click', function() {
-                $('#carrinho-venda').toggleClass('minimizado');
-                const icone = $('#btn-minimizar-carrinho i');
-                icone.toggleClass('fa-chevron-down fa-chevron-up');
-            });
-
             // --- Carga Inicial ---
             carregarCategorias();
             buscarProdutos(true);
-            renderizarCarrinho();
+            carregarCarrinho();
         });
     </script>
 }

@@ -1,14 +1,15 @@
-﻿@{
+﻿@using EllosPratas.Dto
+@using System.Globalization
+@model List<CarrinhoItemDto>
+@{
     ViewData["Title"] = "Registro de Nova Venda";
+    decimal totalVenda = Model.Sum(item => item.Subtotal);
 }
 
 <div class="container my-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
             <h2 class="h4 mb-0"><i class="bi bi-cart-plus-fill me-2"></i>@ViewData["Title"]</h2>
-            <a href="@Url.Action("Index", "Produtos", new { abrirCarrinho = true })" class="btn btn-sm btn-light">
-                <i class="bi bi-plus-lg"></i> Adicionar Produtos
-            </a>
         </div>
         <div class="card-body">
             <form id="form-registrar-venda">
@@ -40,25 +41,48 @@
                     <legend class="float-none w-auto px-2 h6">Itens da Venda</legend>
                     <div class="mb-3">
                         <label for="search-produto" class="form-label"><b>Adicionar Produto</b></label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" id="search-produto" class="form-control" placeholder="Buscar produto por nome ou código...">
-                        </div>
+                        <a href="@Url.Action("Index", "Produtos", new { abrirCarrinho = true })" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-plus-lg">Adicionar Mais Produtos</i>
+                        </a>
                     </div>
 
                     <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                        <table class="table table-hover align-middle">
+                        <table class="table table-hover align-middle" id="tabela-itens-venda">
                             <thead class="table-light sticky-top">
                                 <tr>
                                     <th>Produto</th>
-                                    <th style="width: 150px;">Quantidade</th>
-                                    <th class="text-end">Vlr. Unitário</th>
+                                    <th class="text-center">Quantidade</th>
+                                    <th class="text-end">Valor Unitário</th>
                                     <th class="text-end">Subtotal</th>
-                                    <th class="text-center">Ação</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabela-itens-venda">
+                            <tbody>
+                                @if (!Model.Any())
+                                {
+                                    <tr><td colspan="4" class="text-center text-muted py-3">Nenhum item na venda. Adicione produtos pelo catálogo.</td></tr>
+                                }
+                                else
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@item.NomeProduto</td>
+                                            <td class="text-center">@item.Quantidade</td>
+                                            <td class="text-end">@item.ValorUnitario.ToString("C")</td>
+                                            <td class="text-end fw-bold">@item.Subtotal.ToString("C")</td>
+                                        </tr>
+                                    }
+                                }
                             </tbody>
+                            @if (Model.Any())
+                            {
+                                <tfoot class="table-group-divider">
+                                    <tr>
+                                        <td colspan="3" class="text-end fs-5 fw-bold">Total dos Itens:</td>
+                                        <td class="text-end fs-5 fw-bold">@totalVenda.ToString("C")</td>
+                                    </tr>
+                                </tfoot>
+                            }
                         </table>
                     </div>
                 </fieldset>
@@ -142,18 +166,29 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalNovaFormaPagamento" tabindex="-1" aria-labelledby="modalNovaFormaPagamentoLabel" aria-hidden="true">
+<!-- Modal de Nova Forma de Pagamento (com campos) -->
+<div class="modal fade" id="modalNovaFormaPagamento" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalNovaFormaPagamentoLabel">Nova Forma de Pagamento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Nova Forma de Pagamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <form id="form-nova-forma-pagamento">
+                    <div class="mb-3">
+                        <label for="nome_forma" class="form-label">Nome</label>
+                        <input type="text" id="nome_forma" name="nome_forma" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descricao_forma" class="form-label">Descrição (Opcional)</label>
+                        <textarea id="descricao_forma" name="descricao" class="form-control" rows="2"></textarea>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary">Salvar</button>
+                <button type="button" id="btn-salvar-forma-pagamento" class="btn btn-primary">Salvar</button>
             </div>
         </div>
     </div>
@@ -161,167 +196,97 @@
 
 @section Scripts {
     <script>
-               document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('form-registrar-venda');
-            const tabelaItens = document.getElementById('tabela-itens-venda');
-            // Adicione outros seletores aqui...
+        $(document).ready(function() {
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
 
-            // FUNÇÃO PARA ATUALIZAR OS TOTAIS
-            function calcularTotais() {
-                let subtotal = 0;
-                tabelaItens.querySelectorAll('tr').forEach(row => {
-                    const subtotalCell = row.querySelector('.subtotal-item').textContent;
-                    subtotal += parseFloat(subtotalCell.replace('R$ ', '').replace(',', '.'));
+        function getSubtotalFromTable() {
+            let subtotal = 0;
+            $('#tabela-itens-venda tr').each(function() {
+                const qtd = parseInt($(this).data('quantidade')) || 0;
+                const valorUnitario = parseFloat($(this).data('valor-unitario')) || 0;
+                subtotal += qtd * valorUnitario;
+            });
+            return subtotal;
+        }
+
+        function calcularTotais() {
+                let subtotal = getSubtotalFromTable();
+                let valorDescontoFinal = 0;
+                let descontoInput = $('#input-desconto').val().trim();
+
+                if (descontoInput === "10" || descontoInput === "15") {
+                    valorDescontoFinal = (subtotal * parseFloat(descontoInput)) / 100;
+                } else {
+                    valorDescontoFinal = parseFloat(descontoInput.replace("R$", "").replace(/\./g, '').replace(",", ".")) || 0;
+                }
+
+                let totalFinal = subtotal - valorDescontoFinal;
+
+                $('#resumo-subtotal').text(formatCurrency(subtotal)); // Subtotal é o valor bruto
+                $('#resumo-total').text(formatCurrency(totalFinal));
+        }
+
+        async function carregarFormasPagamento() {
+            const select = $('#select-pagamento');
+            select.prop('disabled', true).html('<option>A carregar...</option>');
+            try {
+                const response = await fetch('@Url.Action("ListarFormasPagamento", "Vendas")');
+                if (!response.ok) throw new Error('Falha ao carregar formas de pagamento');
+                const formas = await response.json();
+
+                select.empty().append('<option value="" selected disabled>Selecione...</option>');
+                formas.forEach(forma => {
+                    select.append(new Option(forma.nome_forma, forma.id_forma_pagamento));
+                });
+                select.prop('disabled', false);
+            } catch (error) {
+                console.error(error);
+                select.html('<option>Erro ao carregar</option>');
+            }
+        }
+
+        $('#btn-salvar-forma-pagamento').on('click', async function() {
+            const form = $('#form-nova-forma-pagamento');
+            if (!form[0].checkValidity()) {
+                form[0].reportValidity();
+                return;
+            }
+
+            const dto = {
+                nome_forma: $('#nome_forma').val(),
+                descricao: $('#descricao_forma').val()
+            };
+
+            try {
+                const response = await fetch('@Url.Action("CadastrarFormaPagamento", "Vendas")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dto)
                 });
 
-                const desconto = parseFloat(document.getElementById('input-desconto').value) || 0;
-                const total = subtotal - desconto;
+                if (!response.ok) throw new Error('Falha ao salvar');
 
-                document.getElementById('resumo-subtotal').textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-                document.getElementById('resumo-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+                const novaForma = await response.json();
+
+                const option = new Option(novaForma.nome_forma, novaForma.id_forma_pagamento, true, true);
+                $('#select-pagamento').append(option).trigger('change');
+
+                var modal = bootstrap.Modal.getInstance(document.getElementById('modalNovaFormaPagamento'));
+                modal.hide();
+                form[0].reset();
+            } catch (error) {
+                alert("Ocorreu um erro ao salvar a forma de pagamento.");
+                console.error(error);
             }
-
-            // SIMULAÇÃO: ADICIONAR ITEM QUANDO SELECIONADO NA BUSCA
-            // No seu projeto real, isso viria de uma chamada AJAX
-            function adicionarItem(produto) {
-                const newRow = `
-                    <tr data-produto-id="${produto.id}">
-                        <td>${produto.nome}</td>
-                        <td>
-                            <div class="input-group">
-                                <button class="btn btn-outline-secondary btn-sm btn-diminuir" type="button">-</button>
-                                <input type="number" class="form-control form-control-sm text-center quantidade-item" value="1" min="1">
-                                <button class="btn btn-outline-secondary btn-sm btn-aumentar" type="button">+</button>
-                            </div>
-                        </td>
-                        <td class="text-end">${produto.preco.toFixed(2).replace('.', ',')}</td>
-                        <td class="text-end subtotal-item">R$ ${produto.preco.toFixed(2).replace('.', ',')}</td>
-                        <td class="text-center">
-                            <button class="btn btn-danger btn-sm btn-remover-item" type="button"><i class="bi bi-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-                tabelaItens.insertAdjacentHTML('beforeend', newRow);
-                calcularTotais();
-            }
-
-            // Adicionando um item de exemplo para visualização
-            adicionarItem({ id: 1, nome: 'Colar de Prata 925', preco: 150.00 });
-
-            // EVENTOS DE INTERAÇÃO NA TABELA
-            tabelaItens.addEventListener('click', function(e) {
-                // ... Lógica para botões de aumentar, diminuir e remover item
-                calcularTotais(); // Recalcula sempre que houver alteração
-            });
-
-            // EVENTO DE ALTERAÇÃO NO DESCONTO
-            document.getElementById('input-desconto').addEventListener('input', calcularTotais);
-
-            // SUBMISSÃO DO FORMULÁRIO
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const dto = {
-                    FuncionarioId: parseInt(document.getElementById('select-funcionario').value),
-                    // ClienteId: ... (lógica para pegar o id do cliente selecionado)
-                    Itens: [],
-                    FormaPagamentoId: parseInt(document.getElementById('select-pagamento').value),
-                    QuantidadeParcelas: parseInt(document.getElementById('select-parcelas').value) || 1,
-                    ValorDesconto: parseFloat(document.getElementById('input-desconto').value),
-                    IsEncomenda: document.getElementById('check-encomenda').checked
-                };
-
-                tabelaItens.querySelectorAll('tr').forEach(row => {
-                    dto.Itens.push({
-                        ProdutoId: parseInt(row.dataset.produtoId),
-                        Quantidade: parseInt(row.querySelector('.quantidade-item').value)
-                    });
-                });
-
-                console.log('DTO a ser enviado:', dto);
-
-                // CHAMADA PARA O CONTROLLER
-                try {
-                    const response = await fetch('/Vendas/RegistrarVenda', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(dto)
-                    });
-
-                    if(response.ok) {
-                        alert('Venda registrada com sucesso!');
-                        // Limpar o formulário ou redirecionar
-                    } else {
-                        alert('Erro ao registrar a venda.');
-                    }
-                } catch (error) {
-                    console.error('Erro na requisição:', error);
-                    alert('Erro de comunicação com o servidor.');
-                }
-            });
-
-            function adicionarItem(produto) {
-                // Verifica se o produto já está na tabela
-                if ($(`#tabela-itens-venda tr[data-produto-id="${produto.id_produto}"]`).length > 0) {
-                    alert('Este produto já foi adicionado à venda.');
-                    return;
-                }
-
-                const newRow = `
-                    <tr data-produto-id="${produto.id_produto}">
-                        <td>${produto.nome_produto}</td>
-                        <td>
-                            <div class="input-group">
-                                <button class="btn btn-outline-secondary btn-sm btn-diminuir" type="button">-</button>
-                                <input type="number" class="form-control form-control-sm text-center quantidade-item" value="1" min="1" data-preco="${produto.valor_unitario}">
-                                <button class="btn btn-outline-secondary btn-sm btn-aumentar" type="button">+</button>
-                            </div>
-                        </td>
-                        <td class="text-end valor-unitario">R$ ${produto.valor_unitario.toFixed(2).replace('.', ',')}</td>
-                        <td class="text-end subtotal-item">R$ ${produto.valor_unitario.toFixed(2).replace('.', ',')}</td>
-                        <td class="text-center">
-                            <button class="btn btn-danger btn-sm btn-remover-item" type="button"><i class="bi bi-trash"></i></button>
-                        </td>
-                    </tr>`;
-                tabelaItens.append(newRow);
-                calcularTotais();
-            }
-
-            // INICIALIZAÇÃO DO AUTOCOMPLETE
-            $("#search-produto").autocomplete({
-                source: function(request, response) {
-                    $.get("/Vendas/BuscarProdutos", { termo: request.term }, function(data) {
-                        response($.map(data, function(item) {
-                            // Mapeia os dados para o formato que o jQuery UI espera
-                            // 'label' é o que aparece na lista, 'value' o que vai pro input (opcional)
-                            // e 'data' é o objeto completo que guardamos para usar depois
-                            return {
-                                label: item.nome_produto,
-                                value: item.nome_produto,
-                                data: item
-                            };
-                        }));
-                    });
-                },
-                minLength: 2, // Começa a buscar a partir de 2 caracteres
-                focus: function(event, ui) {
-                    // ATUALIZA A IMAGEM QUANDO O USUÁRIO PASSA O MOUSE/SETA
-                    const imgSrc = ui.item.data.imagemBase64 ? ui.item.data.imagemBase64 : imagemPadrao;
-                    $('#preview-imagem-produto img').attr('src', imgSrc);
-                    return false; // Previne que o valor do input seja preenchido no foco
-                },
-                select: function(event, ui) {
-                    // ADICIONA O ITEM NA TABELA QUANDO SELECIONADO
-                    adicionarItem(ui.item.data);
-
-                    // Limpa o campo de busca e reseta a imagem
-                    $(this).val('');
-                    $('#preview-imagem-produto img').attr('src', imagemPadrao);
-                    return false; // Previne que o valor do input seja preenchido na seleção
-                }
-            });
         });
+
+        $('#input-desconto').on('keyup change', calcularTotais);
+
+        // Carga Inicial
+        calcularTotais();
+        carregarFormasPagamento();
+    });
     </script>
 }

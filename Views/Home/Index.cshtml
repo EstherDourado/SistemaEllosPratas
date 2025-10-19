@@ -18,6 +18,12 @@
             <li class="menu-item" data-menu="cadastro">
                 Cadastro <span>▶</span>
             </li>
+            <li class="menu-item" data-menu="catalogo">
+                Catalogo <span>▶</span>
+            </li>
+            <li class="menu-item" data-menu="loja">
+                Lojas <span>▶</span>
+            </li>
             <li class="menu-item" data-menu="estoque">
                 Estoque <span>▶</span>
             </li>
@@ -72,11 +78,19 @@
                 { text: "Edição de Produtos", url: "/Produtos/Editar" },
                 { text: "Cliente", url: "/Clientes/Cadastrar" },
                 { text: "Funcionário", url: "#" },
+                { text: "Loja", url: "/Loja/Cadastrar"},
                 { text: "Fornecedor", url: "#" }
             ],
-            estoque: [
+            loja: [
+                { text: "Listar Lojas", url: "/Loja/Index" }
+            ],
+            catalogo: [
                 { text: "Produtos", url: "/Produtos/Index" }
                 
+            ],
+            estoque: [
+                { text: "Estoque", url: "#" }
+
             ],
             vendas: [
                 { text: "Registrar venda", url: "/Vendas/RegistrarVenda" },
@@ -96,15 +110,15 @@
                 { text: "Relatório de vendas", url: "#" },
                 { text: "Relatório financeiro", url: "#" },
                 { text: "Relatório de estoque", url: "#" },
-                { text: "Relatório de clientes", url: "#" },
-                { text: "Relatório de funcionários", url: "#" }
-            ],
-            configuracoes: [
-                { text: "Empresa", url: "#" },
-                { text: "Usuários e permissões", url: "#" },
-                { text: "Métodos de pagamento", url: "#" },
-                { text: "Integrações", url: "#" }
+                // { text: "Relatório de clientes", url: "#" },
+                // { text: "Relatório de funcionários", url: "#" }
             ]
+            // configuracoes: [
+            //     { text: "Empresa", url: "#" },
+            //     { text: "Usuários e permissões", url: "#" },
+            //     { text: "Métodos de pagamento", url: "#" },
+            //     { text: "Integrações", url: "#" }
+            // ]
         };
 
         document.querySelectorAll('.menu-item').forEach(item => {

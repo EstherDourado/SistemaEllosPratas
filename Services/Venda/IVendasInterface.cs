@@ -16,7 +16,8 @@ namespace EllosPratas.Services.Venda
         Task<List<DescontoDto>> ListarDescontos();
         Task<DescontoDto> CadastrarDesconto(DescontoCriarDto dto);
 
-
+        Task<List<FormaPagamentoModel>> ListarFormasPagamento();
+        Task<FormaPagamentoModel> CadastrarFormaPagamento(FormaPagamentoDto dto);
 
 
 

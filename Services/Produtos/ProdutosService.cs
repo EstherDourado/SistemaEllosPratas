@@ -11,11 +11,11 @@ using System.Collections.Generic;
 
 namespace EllosPratas.Services.Produtos
 {
-    public class ProdutosServices : IProdutosInterface
+    public class ProdutosService : IProdutosInterface
     {
         private readonly BancoContext _context;
 
-        public ProdutosServices(BancoContext context)
+        public ProdutosService(BancoContext context)
         {
             _context = context;
         }
