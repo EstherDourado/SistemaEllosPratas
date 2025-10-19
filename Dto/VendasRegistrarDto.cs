@@ -13,6 +13,8 @@
     
         public int id_funcionario { get; set; }
         public int? id_cliente { get; set; }
+        public int id_loja { get; set; }
+        public int id_caixa { get; set; }
         public int? id_desconto { get; set; }
         public int id_forma_pagamento { get; set; }
         public decimal valor_desconto { get; set; }

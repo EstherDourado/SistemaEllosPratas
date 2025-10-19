@@ -10,12 +10,13 @@ namespace EllosPratas.Models
         public required string nome_forma { get; set; } 
         public string? descricao { get; set; }
 
-        [ForeignKey("id_nivel_acesso")]
-        public NivelAcessoModel NivelAcesso { get; set; }
+        //[ForeignKey("id_nivel_acesso")]
+        //public NivelAcessoModel NivelAcesso { get; set; }
 
-        [ForeignKey("id_permissao")]
-        public PermissaoModel Permissao { get; set; }
-        public List<PagamentoModel> Pagamentos { get; set; } = new List<PagamentoModel>();
-    
+        //[ForeignKey("id_permissao")]
+        //public PermissaoModel Permissao { get; set; }
+        public virtual ICollection<PagamentoModel> Pagamentos { get; set; } = new List<PagamentoModel>();
     }
+
 }
+

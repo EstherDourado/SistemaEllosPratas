@@ -1,0 +1,41 @@
+﻿@using EllosPratas.Dto
+@model CarrinhoDto
+@{
+    // Impede que o layout principal da página seja renderizado junto com este componente
+    Layout = null;
+}
+
+<div class="carrinho-header">
+    <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Carrinho (<span id="carrinho-contador">@Model.Itens.Sum(i => i.Quantidade)</span>)</h5>
+</div>
+<div class="carrinho-body">
+    <div id="carrinho-itens-lista">
+        @if (!Model.Itens.Any())
+        {
+            <p class="text-muted text-center">O carrinho está vazio.</p>
+        }
+        else
+        {
+            @foreach (var item in Model.Itens)
+            {
+                <div class="d-flex justify-content-between align-items-center mb-2 carrinho-item">
+                    <div>
+                        <div class="fw-bold">@item.NomeProduto</div>
+                        <div>Qtd: @item.Quantidade x @item.ValorUnitario.ToString("C")</div>
+                    </div>
+                    <div class="fw-bold">@item.Subtotal.ToString("C")</div>
+                </div>
+            }
+        }
+    </div>
+</div>
+<div class="carrinho-footer">
+    <div class="d-flex justify-content-between fw-bold mb-3">
+        <span>Total:</span>
+        <span id="carrinho-total">@Model.Total.ToString("C")</span>
+    </div>
+    <a href="@Url.Action("RegistrarVenda", "Vendas")" class="btn btn-success w-100 @(Model.Itens.Any() ? "" : "disabled")">
+        Ir para Pagamento <i class="fas fa-arrow-right"></i>
+    </a>
+</div>
+

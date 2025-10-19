@@ -18,7 +18,7 @@ namespace EllosPratas.Data
         public DbSet<FormaPagamentoModel> FormaPagamento { get; set; }
         public DbSet<FuncionarioModel> Funcionarios { get; set; }
         public DbSet<ItensVendaModel> ItensVenda { get; set; }
-        public DbSet<LojaModel> Lojas { get; set; }
+        public DbSet<LojaModel> Loja { get; set; }
         public DbSet<MovimentacaoCaixaModel> MovimentacaoCaixa { get; set; }
         public DbSet<NivelAcessoModel> NiveisAcesso { get; set; }
         public DbSet<NivelAcessoPermissaoModel> NivelAcessoPermissoes { get; set; }

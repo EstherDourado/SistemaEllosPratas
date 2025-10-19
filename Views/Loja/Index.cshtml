@@ -1,0 +1,47 @@
+﻿@using EllosPratas.Dto
+@model IEnumerable<LojaListagemDto>
+
+@{
+    ViewData["Title"] = "Lojas Cadastradas";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>@ViewData["Title"]</h1>
+        <a asp-action="Cadastrar" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i>Nova Loja
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome da Loja</th>
+                            <th>Telefone</th>
+                            <th>Endereço</th>
+                            <th style="width: 100px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.nome_loja</td>
+                                <td>@item.telefone</td>
+                                <td>@item.EnderecoCompleto</td>
+                                <td>
+                                    <a asp-action="Editar" asp-route-id="@item.id_loja" class="btn btn-sm btn-outline-primary" title="Editar">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

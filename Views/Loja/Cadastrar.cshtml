@@ -1,0 +1,140 @@
+﻿@using EllosPratas.Dto
+@model LojaCadastroDto
+
+@{
+    ViewData["Title"] = "Cadastrar Nova Loja";
+}
+
+<!-- Adicionar referência ao CSS do Select2 no <head> ou aqui -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">@ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Loja" asp-action="Cadastrar" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <h5>Dados da Loja</h5>
+                        <hr />
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label asp-for="nome_loja" class="form-label">Nome da Loja</label>
+                                <input asp-for="nome_loja" class="form-control" />
+                                <span asp-validation-for="nome_loja" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="telefone" class="form-label">Telefone da Loja</label>
+                                <input asp-for="telefone" class="form-control" />
+                                <span asp-validation-for="telefone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Endereço</h5>
+                        <hr />
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="id_estado" class="form-label"></label>
+                                <select asp-for="id_estado" class="form-select" id="select-estado"></select>
+                                <span asp-validation-for="id_estado" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="id_cidade" class="form-label"></label>
+                                <select asp-for="id_cidade" class="form-select" id="select-cidade"></select>
+                                <span asp-validation-for="id_cidade" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="rua" class="form-label">Endereço</label>
+                                <input asp-for="rua" class="form-control" />
+                                <span asp-validation-for="rua" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="bairro" class="form-label">Bairro</label>
+                                <input asp-for="bairro" class="form-control" />
+                                <span asp-validation-for="bairro" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label asp-for="numero" class="form-label">Numero</label>
+                                <input asp-for="numero" class="form-control" />
+                                <span asp-validation-for="numero" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Cadastrar Loja</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            const selectEstado = $('#select-estado');
+            const selectCidade = $('#select-cidade');
+
+            selectEstado.select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Selecione um estado',
+                ajax: {
+                    url: '@Url.Action("ListarEstados", "Loja")',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    }
+                }
+            });
+
+            selectCidade.select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Selecione uma cidade'
+            });
+
+            selectEstado.on('select2:select', function (e) {
+                const estadoId = e.params.data.id;
+                selectCidade.val(null).trigger('change'); // Limpa a seleção anterior
+                selectCidade.prop('disabled', false);
+
+                selectCidade.select2({
+                    theme: 'bootstrap-5',
+                    placeholder: 'Selecione uma cidade',
+                     ajax: {
+                        url: '@Url.Action("ListarCidades", "Loja")',
+                        dataType: 'json',
+                        data: function(params) {
+                            return {
+                                estadoId: estadoId,
+                                q: params.term // termo da pesquisa
+                            };
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
+
