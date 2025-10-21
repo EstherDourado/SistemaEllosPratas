@@ -46,7 +46,7 @@ namespace EllosPratas.Services.CarrinhoVenda
                 {
                     ProdutoId = produtoId,
                     NomeProduto = nome,
-                    ValorUnitario = valorUnitario,
+                    ValorUnitario = valorUnitario / 100,
                     Quantidade = quantidade
                 });
             }

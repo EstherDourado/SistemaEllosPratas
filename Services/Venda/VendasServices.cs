@@ -86,14 +86,14 @@ namespace EllosPratas.Services.Venda
                         estoque.quantidade -= itemDto.quantidade;
                         _context.Estoque.Update(estoque);
 
-                        var subtotal = itemDto.quantidade * produto.valor_unitario;
+                        var subtotal = itemDto.quantidade * produto.valor_unitario / 100;
                         valorTotalCalculado += subtotal;
 
                         novaVenda.Itens.Add(new ItensVendaModel
                         {
                             id_produto = itemDto.id_produto,
                             quantidade = itemDto.quantidade,
-                            valor_unitario = produto.valor_unitario,
+                            valor_unitario = produto.valor_unitario / 100,
                             valor_total = subtotal
                         });
                     }

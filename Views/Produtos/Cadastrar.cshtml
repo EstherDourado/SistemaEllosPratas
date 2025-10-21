@@ -215,6 +215,11 @@
             }
 
 
+            for (let [chave, valor] of formData.entries()) {
+                console.log(chave + ':', valor);
+            }
+
+
             $.ajax({
                 type: 'POST',
                 url: postUrl,
