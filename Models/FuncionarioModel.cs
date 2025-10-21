@@ -14,9 +14,9 @@ namespace EllosPratas.Models
         public int id_nivel_acesso { get; set; }
 
         [ForeignKey("id_nivel_acesso")]
-        public NivelAcessoModel NivelAcesso { get; set; }
+        public required NivelAcessoModel NivelAcesso { get; set; }
         [ForeignKey("id_loja")]
-        public LojaModel Loja { get; set; }
+        public required LojaModel Loja { get; set; }
 
         public required string nome_funcionario { get; set; }
         public string telefone { get; set; } = string.Empty;
