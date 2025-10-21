@@ -35,6 +35,7 @@ builder.Services.AddScoped<ICategoriasInterface, CategoriasServices>();
 builder.Services.AddScoped<ICarrinhoInterface, CarrinhoServices>();
 builder.Services.AddScoped<IVendasInterface, VendasServices>();
 builder.Services.AddScoped<ILojaInterface, LojaService>();
+builder.Services.AddScoped<IFuncionariosInterface, FuncionarioService>();
 
 var cultureInfo = new System.Globalization.CultureInfo("pt-BR");
 System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;

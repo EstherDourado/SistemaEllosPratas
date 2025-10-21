@@ -1,0 +1,57 @@
+﻿@using EllosPratas.Models
+@model IEnumerable<FuncionarioModel>
+
+@{
+    ViewData["Title"] = "Consulta de Funcionários";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">@ViewData["Title"]</h4>
+            <a asp-controller="Funcionarios" asp-action="Cadastrar" class="btn btn-light">Cadastrar Novo Funcionário</a>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Nível Acesso (ID)</th>
+                                <th>Loja (ID)</th>
+                                <th>Data Admissão</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var funcionario in Model)
+                            {
+                                <tr>
+                                    <td>@funcionario.nome_funcionario</td>
+                                    <td>@funcionario.cpf</td>
+                                    <td>@funcionario.id_nivel_acesso</td>
+                                    <td>@funcionario.id_loja</td>
+                                    <td>@funcionario.data_admissao.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-center">
+                                        <a asp-controller="Funcionarios" asp-action="Editar" asp-route-id="@funcionario.id_funcionario" class="btn btn-sm btn-outline-primary">
+                                            Editar
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center" role="alert">
+                    Nenhum funcionário cadastrado ainda.
+                </div>
+            }
+        </div>
+    </div>
+</div>
