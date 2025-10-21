@@ -36,6 +36,10 @@ builder.Services.AddScoped<ICarrinhoInterface, CarrinhoServices>();
 builder.Services.AddScoped<IVendasInterface, VendasServices>();
 builder.Services.AddScoped<ILojaInterface, LojaService>();
 
+var cultureInfo = new System.Globalization.CultureInfo("pt-BR");
+System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

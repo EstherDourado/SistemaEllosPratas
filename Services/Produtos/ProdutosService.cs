@@ -87,8 +87,6 @@ namespace EllosPratas.Services.Produtos
             return produtoExistente;
         }
 
-        // --- Demais métodos do serviço permanecem inalterados ---
-        #region Métodos Inalterados
         private string NormalizarString(string input)
         {
             if (string.IsNullOrEmpty(input)) return string.Empty;
@@ -115,7 +113,7 @@ namespace EllosPratas.Services.Produtos
             }
             var totalProdutos = await query.CountAsync();
             var produtosPaginados = await query.OrderByDescending(p => p.id_produto).Skip((filtro.Pagina - 1) * filtro.ItensPorPagina).Take(filtro.ItensPorPagina).ToListAsync();
-            var categoriasComProdutos = produtosPaginados.GroupBy(p => p.Categoria).Select(g => new CategoriaComProdutosDto { idCategoria = g.Key.id_categoria, nomeCategoria = g.Key.nome_categoria, Produtos = g.Select(p => new ProdutoListagemDto { id_produto = p.id_produto, nome_produto = p.nome_produto, descricao = p.descricao, valor_unitario = p.valor_unitario, ativo = p.ativo, quantidade = p.Estoque?.quantidade ?? 0, ImagemBase64 = p.imagem != null ? Convert.ToBase64String(p.imagem) : null }).ToList() }).OrderBy(c => c.nomeCategoria).ToList();
+            var categoriasComProdutos = produtosPaginados.GroupBy(p => p.Categoria).Select(g => new CategoriaComProdutosDto { idCategoria = g.Key.id_categoria, nomeCategoria = g.Key.nome_categoria, Produtos = g.Select(p => new ProdutoListagemDto { id_produto = p.id_produto, nome_produto = p.nome_produto, descricao = p.descricao, valor_unitario = p.valor_unitario / 100, ativo = p.ativo, quantidade = p.Estoque?.quantidade ?? 0, ImagemBase64 = p.imagem != null ? Convert.ToBase64String(p.imagem) : null }).ToList() }).OrderBy(c => c.nomeCategoria).ToList();
             return new FiltroProdutosResultadoDto { Categorias = categoriasComProdutos, TotalProdutos = totalProdutos, PaginaAtual = filtro.Pagina, TotalPaginas = (int)Math.Ceiling(totalProdutos / (double)filtro.ItensPorPagina) };
         }
 
@@ -144,7 +142,7 @@ namespace EllosPratas.Services.Produtos
 
         public async Task<List<ProdutosModel>> GetProdutos() => await _context.Produtos.Include(p => p.Estoque).ToListAsync();
         public async Task<ProdutosModel> GetProdutoPorId(int id) => await _context.Produtos.Include(p => p.Estoque).FirstOrDefaultAsync(p => p.id_produto == id);
-        #endregion
+        
     }
 }
 

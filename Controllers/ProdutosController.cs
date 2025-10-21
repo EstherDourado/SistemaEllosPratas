@@ -50,8 +50,21 @@ namespace EllosPratas.Controllers
 
             try
             {
+
+                if (decimal.TryParse(produtosCriacaoDto.valor_unitario.ToString(),
+                    System.Globalization.NumberStyles.Number,
+                    new System.Globalization.CultureInfo("pt-BR"),
+                    out decimal valorConvertido))
+                {
+                    produtosCriacaoDto.valor_unitario = Math.Round(valorConvertido, 2);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Erro ao converter o valor do preço. Verifique o formato." });
+                }
+
                 await _produtosInterface.CadastrarProduto(produtosCriacaoDto, produtosCriacaoDto.imagem);
-                // <<-- CORREÇÃO: Retornando JSON para a chamada AJAX
+
                 return Json(new { success = true, message = "Produto cadastrado com sucesso!" });
             }
             catch (Exception ex)
