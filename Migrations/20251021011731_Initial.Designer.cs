@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EllosPratas.Migrations
 {
     [DbContext(typeof(BancoContext))]
-    [Migration("20251019212759_AdicionandoAlteracaoEmVendas")]
-    partial class AdicionandoAlteracaoEmVendas
+    [Migration("20251021011731_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -256,21 +256,11 @@ namespace EllosPratas.Migrations
                     b.Property<string>("descricao")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("id_nivel_acesso")
-                        .HasColumnType("int");
-
-                    b.Property<int>("id_permissao")
-                        .HasColumnType("int");
-
                     b.Property<string>("nome_forma")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("id_forma_pagamento");
-
-                    b.HasIndex("id_nivel_acesso");
-
-                    b.HasIndex("id_permissao");
 
                     b.ToTable("FormaPagamento");
                 });
@@ -370,7 +360,7 @@ namespace EllosPratas.Migrations
 
                     b.HasKey("id_loja");
 
-                    b.ToTable("Lojas");
+                    b.ToTable("Loja");
                 });
 
             modelBuilder.Entity("EllosPratas.Models.MovimentacaoCaixaModel", b =>
@@ -656,25 +646,6 @@ namespace EllosPratas.Migrations
                         .IsRequired();
 
                     b.Navigation("Produto");
-                });
-
-            modelBuilder.Entity("EllosPratas.Models.FormaPagamentoModel", b =>
-                {
-                    b.HasOne("EllosPratas.Models.NivelAcessoModel", "NivelAcesso")
-                        .WithMany()
-                        .HasForeignKey("id_nivel_acesso")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EllosPratas.Models.PermissaoModel", "Permissao")
-                        .WithMany()
-                        .HasForeignKey("id_permissao")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("NivelAcesso");
-
-                    b.Navigation("Permissao");
                 });
 
             modelBuilder.Entity("EllosPratas.Models.FuncionarioModel", b =>
