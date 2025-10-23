@@ -16,49 +16,45 @@ namespace EllosPratas.Services.Loja
 
         public async Task<LojaModel> CadastrarLoja(LojaCadastroDto dto)
         {
-            // Usa uma transação para garantir que Loja e Endereço sejam guardados juntos
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    // 1. Procura ou cria o Estado
-                    var estado = await _context.Estados.FirstOrDefaultAsync(e => e.uf == dto.uf);
-                    if (estado == null)
-                    {
-                        estado = new EstadoModel { uf = dto.uf, nome_estado = dto.estado };
-                        _context.Estados.Add(estado);
-                        await _context.SaveChangesAsync(); // Guarda para obter o ID do estado
-                    }
+                    // 1. Busca a Cidade para pegar o nome
+                    var cidade = await _context.Cidades
+                        .Include(c => c.Estado)
+                        .FirstOrDefaultAsync(c => c.id_cidade == dto.id_cidade);
 
-                    // 2. Procura ou cria a Cidade, associada ao Estado
-                    var cidade = await _context.Cidades.FirstOrDefaultAsync(c => c.nome_cidade == dto.cidade && c.id_estado == estado.id_estado);
                     if (cidade == null)
                     {
-                        cidade = new CidadeModel { nome_cidade = dto.cidade, id_estado = estado.id_estado };
-                        _context.Cidades.Add(cidade);
-                        await _context.SaveChangesAsync(); // Guarda para obter o ID da cidade
+                        throw new Exception("Cidade não encontrada.");
                     }
 
-                    // 3. Cria a Loja
+                    // 2. Cria a Loja SEM id_endereco (será preenchido depois se necessário)
                     var novaLoja = new LojaModel
                     {
                         nome_loja = dto.nome_loja,
-                        telefone = dto.telefone
+                        telefone = dto.telefone,
+                        id_endereco = "0" // Temporário
                     };
                     _context.Loja.Add(novaLoja);
-                    await _context.SaveChangesAsync(); // Guarda para obter o ID da loja
+                    await _context.SaveChangesAsync(); // Salva para obter o id_loja
 
-                    // 4. Cria o Endereço e associa-o à Loja e à Cidade
+                    // 3. Cria o Endereço associado à Loja
                     var novoEndereco = new EnderecoModel
                     {
                         rua = dto.rua,
                         numero = dto.numero,
                         bairro = dto.bairro,
-                        cidade = dto.cidade,
-                        id_loja = novaLoja.id_loja,
+                        cidade = cidade.nome_cidade,
+                        id_loja = novaLoja.id_loja, // Agora temos o id_loja válido
                         id_cidade = cidade.id_cidade
                     };
                     _context.Enderecos.Add(novoEndereco);
+                    await _context.SaveChangesAsync(); // Salva o endereço
+
+                    // 4. Atualiza o id_endereco na Loja
+                    novaLoja.id_endereco = novoEndereco.id_endereco.ToString();
                     await _context.SaveChangesAsync();
 
                     // 5. Confirma a transação
@@ -68,7 +64,6 @@ namespace EllosPratas.Services.Loja
                 }
                 catch (Exception)
                 {
-                    // Se algo falhar, desfaz tudo
                     await transaction.RollbackAsync();
                     throw;
                 }
@@ -78,15 +73,15 @@ namespace EllosPratas.Services.Loja
         public async Task<List<LojaListagemDto>> ListarLojas()
         {
             return await _context.Loja
-                .Include(l => l.Endereco) // Inclui o endereço relacionado
-                .ThenInclude(e => e.Cidade) // A partir do endereço, inclui a cidade
-                .ThenInclude(c => c.Estado) // A partir da cidade, inclui o estado
+                .Include(l => l.Endereco)
+                    .ThenInclude(e => e.Cidade)
+                        .ThenInclude(c => c.Estado)
                 .Select(l => new LojaListagemDto
                 {
                     id_loja = l.id_loja,
                     nome_loja = l.nome_loja,
                     telefone = l.telefone,
-                    EnderecoCompleto = l.Endereco != null
+                    EnderecoCompleto = (l.Endereco != null && l.Endereco.Cidade != null && l.Endereco.Cidade.Estado != null)
                         ? $"{l.Endereco.rua}, {l.Endereco.numero} - {l.Endereco.bairro}, {l.Endereco.Cidade.nome_cidade} - {l.Endereco.Cidade.Estado.uf}"
                         : "Endereço não cadastrado"
                 })
@@ -127,11 +122,9 @@ namespace EllosPratas.Services.Loja
                     var cidade = await _context.Cidades.FindAsync(dto.id_cidade);
                     if (cidade == null) throw new Exception("Cidade não encontrada.");
 
-                    // Atualiza os dados da loja
                     lojaExistente.nome_loja = dto.nome_loja;
                     lojaExistente.telefone = dto.telefone;
 
-                    // Atualiza os dados do endereço
                     enderecoExistente.rua = dto.rua;
                     enderecoExistente.numero = dto.numero;
                     enderecoExistente.bairro = dto.bairro;

@@ -20,7 +20,6 @@ namespace EllosPratas.Services.Produtos
             _context = context;
         }
 
-        // Alterado: O método agora recebe o DTO com a imagem dentro
         public async Task<ProdutosModel> CadastrarProduto(ProdutosCriacaoDto produtosCriacaoDto, IFormFile? imagem)
         {
             var produto = new ProdutosModel
@@ -29,10 +28,10 @@ namespace EllosPratas.Services.Produtos
                 descricao = produtosCriacaoDto.descricao,
                 valor_unitario = produtosCriacaoDto.valor_unitario,
                 id_categoria = produtosCriacaoDto.id_categoria,
+                //quantidade = produtosCriacaoDto.quantidade,
                 ativo = produtosCriacaoDto.ativo
             };
 
-            // A lógica de conversão da imagem agora usa a propriedade do DTO
             if (produtosCriacaoDto.imagem != null && produtosCriacaoDto.imagem.Length > 0)
             {
                 using (var memoryStream = new MemoryStream())
@@ -45,7 +44,13 @@ namespace EllosPratas.Services.Produtos
             _context.Produtos.Add(produto);
             await _context.SaveChangesAsync();
 
-            var estoque = new EstoqueModel { id_produto = produto.id_produto, quantidade = produtosCriacaoDto.quantidade };
+            var estoque = new EstoqueModel
+            {
+                id_produto = produto.id_produto,
+                //quantidade = produtosCriacaoDto.quantidade,
+                //quantidade_entrada = produtosCriacaoDto.quantidade, 
+                //data_entrada = DateTime.Now       
+            };
             _context.Estoque.Add(estoque);
             await _context.SaveChangesAsync();
 
@@ -121,10 +126,13 @@ namespace EllosPratas.Services.Produtos
         {
             var produto = await _context.Produtos.FindAsync(id);
             if (produto == null) return false;
+
             var temVendas = await _context.ItensVenda.AnyAsync(i => i.id_produto == id);
             if (temVendas) throw new Exception("Produto não pode ser deletado: possui vendas associadas.");
+            
             var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.id_produto == id);
             if (estoque != null) _context.Estoque.Remove(estoque);
+
             _context.Produtos.Remove(produto);
             await _context.SaveChangesAsync();
             return true;

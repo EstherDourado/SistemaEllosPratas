@@ -37,11 +37,9 @@ namespace EllosPratas.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken] // <<-- CORREÇÃO: Ignora o token para esta chamada AJAX específica
+        [IgnoreAntiforgeryToken] 
         public async Task<IActionResult> Cadastrar([FromForm] ProdutosCriacaoDto produtosCriacaoDto, IFormFile? imagem)
         {
-        
-            // Se houver erros de validação dos DataAnnotations (ex: Range)
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
@@ -70,7 +68,6 @@ namespace EllosPratas.Controllers
             catch (Exception ex)
             {
                 Debug.WriteLine($"ERRO AO CADASTRAR PRODUTO: {ex.Message}");
-                // <<-- CORREÇÃO: Retornando JSON para a chamada AJAX 
                 return Json(new { success = false, message = "Ocorreu um erro no servidor ao tentar cadastrar o produto." });
             }
         }
@@ -100,7 +97,7 @@ namespace EllosPratas.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken] // Adicionado para consistência com o cadastro via AJAX
+        [IgnoreAntiforgeryToken] 
         public async Task<IActionResult> Editar([FromForm] ProdutosEdicaoDto dto)
         {
             ModelState.Remove("imagem");
