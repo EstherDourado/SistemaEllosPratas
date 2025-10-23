@@ -14,13 +14,13 @@ namespace EllosPratas.Models
         public int id_nivel_acesso { get; set; }
 
         [ForeignKey("id_nivel_acesso")]
-        public required NivelAcessoModel NivelAcesso { get; set; }
+        public NivelAcessoModel NivelAcesso { get; set; }
         [ForeignKey("id_loja")]
-        public required LojaModel Loja { get; set; }
+        public  LojaModel Loja { get; set; }
 
-        public required string nome_funcionario { get; set; }
+        public  string nome_funcionario { get; set; }
         public string telefone { get; set; } = string.Empty;
-        public required string cpf { get; set; }
+        public  string cpf { get; set; }
         public DateTime data_admissao { get; set; }
 
         public List<VendasModel> Vendas { get; set; } = new List<VendasModel>();

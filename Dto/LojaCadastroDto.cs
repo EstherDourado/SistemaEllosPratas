@@ -27,17 +27,14 @@ namespace EllosPratas.Dto
         [Display(Name = "Bairro")]
         public string bairro { get; set; }
 
-        [Required(ErrorMessage = "A cidade é obrigatória.")]
-        [Display(Name = "Cidade")]
-        public string cidade { get; set; }
-
-        [Required(ErrorMessage = "O estado é obrigatório.")]
+        [Required(ErrorMessage = "Selecione um estado.")]
         [Display(Name = "Estado")]
-        public string estado { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Selecione um estado.")]
+        public int id_estado { get; set; }
 
-        [Required(ErrorMessage = "A UF é obrigatória.")]
-        [StringLength(2, MinimumLength = 2, ErrorMessage = "UF deve ter 2 caracteres.")]
-        [Display(Name = "UF")]
-        public string uf { get; set; }
+        [Required(ErrorMessage = "Selecione uma cidade.")]
+        [Display(Name = "Cidade")]
+        [Range(1, int.MaxValue, ErrorMessage = "Selecione uma cidade.")]
+        public int id_cidade { get; set; }
     }
 }

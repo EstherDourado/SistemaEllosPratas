@@ -24,6 +24,7 @@ public class ProdutosCriacaoDto
     [Range(0, int.MaxValue, ErrorMessage = "A quantidade não pode ser negativa.")]
     public int quantidade { get; set; }
 
+    public int quantidade_entrada { get; set; }
     //[Display(Name = "Categoria")]
     [Required(ErrorMessage = "Selecione uma 'Categoria'.")]
     [Range(1, int.MaxValue, ErrorMessage = "Selecione uma categoria válida.")]

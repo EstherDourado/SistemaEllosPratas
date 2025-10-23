@@ -10,10 +10,11 @@ namespace EllosPratas.Controllers
     {
         private readonly ILojaInterface _lojaService;
         private readonly BancoContext _context;
-        public LojaController(ILojaInterface lojaService)
+
+        public LojaController(ILojaInterface lojaService, BancoContext context)
         {
             _lojaService = lojaService;
-
+            _context = context;
         }
 
         public IActionResult Cadastrar()
@@ -27,20 +28,23 @@ namespace EllosPratas.Controllers
         {
             if (!ModelState.IsValid)
             {
-               
-                return View(dto);
+                var erros = ModelState.Values
+                                      .SelectMany(v => v.Errors)
+                                      .Select(e => e.ErrorMessage);
+
+                return Json(new { success = false, message = string.Join("\n", erros) });
             }
 
             try
             {
                 await _lojaService.CadastrarLoja(dto);
-                TempData["MensagemSucesso"] = "Loja cadastrada com sucesso!";
-                return RedirectToAction("Index", "Home");
+                return Json(new { success = true, message = "Loja cadastrada com sucesso!" });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, "Ocorreu um erro ao cadastrar a loja. Detalhes: " + ex.Message);
-                return View(dto);
+                var innerMessage = ex.InnerException?.Message ?? ex.Message;
+                var fullMessage = $"Erro: {ex.Message}\nDetalhes: {innerMessage}";
+                return Json(new { success = false, message = fullMessage });
             }
         }
 
@@ -114,6 +118,13 @@ namespace EllosPratas.Controllers
                 ModelState.AddModelError("", "Ocorreu um erro ao atualizar a loja: " + ex.Message);
                 return View(dto);
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var listaDeLojas = await _lojaService.ListarLojas();
+            return View(listaDeLojas);
         }
     }
 }
