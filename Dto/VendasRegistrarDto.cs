@@ -10,7 +10,6 @@
 
     public class VendasRegistrarDto
     {
-    
         public int id_funcionario { get; set; }
         public int? id_cliente { get; set; }
         public int id_loja { get; set; }

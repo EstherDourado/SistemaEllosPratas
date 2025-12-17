@@ -22,14 +22,13 @@ namespace EllosPratas.Controllers
             return View();
         }
 
-        [HttpGet] // Action para carregar a página
+        [HttpGet] 
         public IActionResult RegistrarVenda()
         {
             var carrinho = _carrinhoService.GetCarrinho();
             return View(carrinho.Itens);
         }
 
-        // NOVO: Action para RECEBER os dados do formulário
         [HttpPost]
         public async Task<IActionResult> RegistrarVenda([FromBody] VendasRegistrarDto vendaDto)
         {
@@ -106,6 +105,5 @@ namespace EllosPratas.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-
     }
 }

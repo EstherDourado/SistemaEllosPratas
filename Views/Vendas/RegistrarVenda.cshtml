@@ -2,14 +2,25 @@
 @using System.Globalization
 @model List<CarrinhoItemDto>
 @{
-    ViewData["Title"] = "Registro de Nova Venda";
+    ViewData["Title"] = "Controle de Caixa";
     decimal totalVenda = Model.Sum(item => item.Subtotal);
 }
 
 <div class="container my-4">
+    <!-- Alerta quando caixa está fechado -->
+    <div id="alerta-caixa-fechado" class="alert alert-warning d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+        <div>
+            <strong>Atenção!</strong> Você precisa abrir o caixa antes de registrar vendas.
+            <button class="btn btn-sm btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#modalGerenciarCaixa">
+                <i class="bi bi-box-arrow-right me-1"></i>Abrir Caixa Agora
+            </button>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h2 class="h4 mb-0"><i class="bi bi-cart-plus-fill me-2"></i>@ViewData["Title"]</h2>
+            <h2 class="h4 mb-0"><i class="bi bi-cart-plus-fill me-2"></i>Registroadww de Venda</h2>
         </div>
         <div class="card-body">
             <form id="form-registrar-venda">
@@ -25,7 +36,11 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="search-cliente" class="form-label"><b>Cliente</b> (Opcional)</label>
+                            <label for="search-cliente" class="form-label">
+                                <b>Cliente</b>
+                                <span id="cliente-obrigatorio" class="text-danger" style="display: none;">*</span>
+                                <span class="text-muted small">(Opcional)</span>
+                            </label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-search"></i></span>
                                 <input type="text" id="search-cliente" class="form-control" placeholder="Buscar cliente por nome ou CPF...">
@@ -35,18 +50,34 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="check-encomenda">
+                                <label class="form-check-label" for="check-encomenda">
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    <b>É uma encomenda?</b>
+                                </label>
+                            </div>
+                            <small class="text-muted">Ao marcar como encomenda, o cliente se torna obrigatório</small>
+                        </div>
+                        <div class="col-md-6" id="div-data-encomenda" style="display: none;">
+                            <label for="data-entrega-encomenda" class="form-label"><b>Data de Entrega</b></label>
+                            <input type="date" id="data-entrega-encomenda" class="form-control">
+                        </div>
+                    </div>
                 </fieldset>
 
                 <fieldset class="border p-3 rounded mb-4">
                     <legend class="float-none w-auto px-2 h6">Itens da Venda</legend>
                     <div class="mb-3">
-                        <label for="search-produto" class="form-label"><b>Adicionar Produto</b></label>
-                        <a href="@Url.Action("Index", "Produtos", new { abrirCarrinho = true })" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-plus-lg">Adicionar Mais Produtos</i>
+                        <a href="@Url.Action("Index", "Produtos", new { abrirCarrinho = true })" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Adicionar Produtos ao Carrinho
                         </a>
                     </div>
 
-                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
                         <table class="table table-hover align-middle" id="tabela-itens-venda">
                             <thead class="table-light sticky-top">
                                 <tr>
@@ -54,22 +85,35 @@
                                     <th class="text-center">Quantidade</th>
                                     <th class="text-end">Valor Unitário</th>
                                     <th class="text-end">Subtotal</th>
+                                    <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @if (!Model.Any())
                                 {
-                                    <tr><td colspan="4" class="text-center text-muted py-3">Nenhum item na venda. Adicione produtos pelo catálogo.</td></tr>
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            <i class="bi bi-cart-x fs-1 d-block mb-2"></i>
+                                            Nenhum item no carrinho. Adicione produtos pelo catálogo.
+                                        </td>
+                                    </tr>
                                 }
                                 else
                                 {
                                     @foreach (var item in Model)
                                     {
-                                        <tr>
+                                        <tr data-produto-id="@item.ProdutoId" data-quantidade="@item.Quantidade" data-valor-unitario="@item.ValorUnitario">
                                             <td>@item.NomeProduto</td>
-                                            <td class="text-center">@item.Quantidade</td>
+                                            <td class="text-center">
+                                                <input type="number" class="form-control form-control-sm input-quantidade" value="@item.Quantidade" min="1" style="width: 70px; margin: 0 auto;">
+                                            </td>
                                             <td class="text-end">@item.ValorUnitario.ToString("C")</td>
-                                            <td class="text-end fw-bold">@item.Subtotal.ToString("C")</td>
+                                            <td class="text-end fw-bold subtotal-item">@item.Subtotal.ToString("C")</td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-danger btn-remover-item">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                     }
                                 }
@@ -79,7 +123,8 @@
                                 <tfoot class="table-group-divider">
                                     <tr>
                                         <td colspan="3" class="text-end fs-5 fw-bold">Total dos Itens:</td>
-                                        <td class="text-end fs-5 fw-bold">@totalVenda.ToString("C")</td>
+                                        <td class="text-end fs-5 fw-bold" id="total-itens-rodape">@totalVenda.ToString("C")</td>
+                                        <td></td>
                                     </tr>
                                 </tfoot>
                             }
@@ -89,36 +134,40 @@
 
                 <div class="row">
                     <div class="col-lg-7">
-                        <fieldset class="border p-3 rounded mb-4">
-                            <legend class="float-none w-auto px-2 h6">Opções</legend>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="check-encomenda">
-                                <label class="form-check-label" for="check-encomenda"><b>É uma encomenda?</b> (Cliente se torna obrigatório)</label>
+                        <div class="card border-info mb-3">
+                            <div class="card-header bg-info bg-opacity-10">
+                                <h6 class="mb-0"><i class="bi bi-info-circle me-1"></i>Observações da Venda</h6>
                             </div>
-                        </fieldset>
-                    </div>
-                    <div class="col-lg-5">
-                        <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title mb-3">Resumo e Pagamento</h5>
-                                <ul class="list-group list-group-flush">
+                                <textarea id="observacoes-venda" class="form-control" rows="4" placeholder="Digite observações adicionais sobre a venda (opcional)..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="card border-success">
+                            <div class="card-header bg-success bg-opacity-10">
+                                <h5 class="mb-0"><i class="bi bi-cash-stack me-1"></i>Resumo e Pagamento</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush mb-3">
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        Subtotal
-                                        <span id="resumo-subtotal">R$ 0,00</span>
+                                        <span>Subtotal</span>
+                                        <span id="resumo-subtotal" class="fw-bold">R$ 0,00</span>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        Desconto
-                                        <div class="input-group" style="width: 120px;">
+                                        <span>Desconto</span>
+                                        <div class="input-group input-group-sm" style="width: 130px;">
                                             <span class="input-group-text">R$</span>
-                                            <input type="number" id="input-desconto" class="form-control" value="0.00" min="0">
+                                            <input type="number" id="input-desconto" class="form-control" value="0.00" min="0" step="0.01">
                                         </div>
                                     </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center fw-bold fs-4">
-                                        TOTAL
-                                        <span id="resumo-total" class="text-success">R$ 0,00</span>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
+                                        <span class="fw-bold fs-5">TOTAL</span>
+                                        <span id="resumo-total" class="text-success fw-bold fs-4">R$ 0,00</span>
                                     </li>
                                 </ul>
-                                <hr>
+
                                 <div class="mb-3">
                                     <label for="select-pagamento" class="form-label"><b>Forma de Pagamento</b> <span class="text-danger">*</span></label>
                                     <div class="input-group">
@@ -130,9 +179,15 @@
                                         </button>
                                     </div>
                                 </div>
+
                                 <div class="mb-3" id="div-parcelas" style="display: none;">
                                     <label for="select-parcelas" class="form-label"><b>Parcelas</b></label>
                                     <select id="select-parcelas" class="form-select">
+                                        <option value="1">1x sem juros</option>
+                                        <option value="2">2x sem juros</option>
+                                        <option value="3">3x sem juros</option>
+                                        <option value="6">6x sem juros</option>
+                                        <option value="12">12x sem juros</option>
                                     </select>
                                 </div>
                             </div>
@@ -140,23 +195,29 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end mt-4">
-                    <button type="button" class="btn btn-secondary me-2">Limpar Campos</button>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle-fill me-2"></i>Registrar Venda</button>
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-secondary" id="btn-limpar">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Limpar Campos
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg" id="btn-finalizar-venda" disabled>
+                        <i class="bi bi-check-circle-fill me-2"></i>Finalizar Venda
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalNovoCliente" tabindex="-1" aria-labelledby="modalNovoClienteLabel" aria-hidden="true">
+<!-- Modal: Novo Cliente -->
+<div class="modal fade" id="modalNovoCliente" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalNovoClienteLabel">Cadastro Rápido de Cliente</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Cadastro Rápido de Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <p class="text-muted">Funcionalidade de cadastro rápido será implementada aqui.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -166,7 +227,7 @@
     </div>
 </div>
 
-<!-- Modal de Nova Forma de Pagamento (com campos) -->
+<!-- Modal: Nova Forma de Pagamento -->
 <div class="modal fade" id="modalNovaFormaPagamento" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -197,96 +258,152 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-        function formatCurrency(value) {
-            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
+            let caixaAberto = false;
+            let idCaixaAtual = null;
+            let idLojaAtual = null;
 
-        function getSubtotalFromTable() {
-            let subtotal = 0;
-            $('#tabela-itens-venda tr').each(function() {
-                const qtd = parseInt($(this).data('quantidade')) || 0;
-                const valorUnitario = parseFloat($(this).data('valor-unitario')) || 0;
-                subtotal += qtd * valorUnitario;
-            });
-            return subtotal;
-        }
+            // ===== FUNÇÕES AUXILIARES =====
+            function formatCurrency(value) {
+                return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
 
-        function calcularTotais() {
-                let subtotal = getSubtotalFromTable();
-                let valorDescontoFinal = 0;
-                let descontoInput = $('#input-desconto').val().trim();
-
-                if (descontoInput === "10" || descontoInput === "15") {
-                    valorDescontoFinal = (subtotal * parseFloat(descontoInput)) / 100;
+            function atualizarStatusCaixa(aberto, dados = {}) {
+                caixaAberto = aberto;
+                if (aberto) {
+                    idCaixaAtual = dados.id_caixa;
+                    $('#status-caixa-info').html(`
+                        <span class="badge bg-success fs-6">
+                            <i class="bi bi-check-circle me-1"></i>Caixa Aberto
+                        </span>
+                    `);
+                    $('#alerta-caixa-fechado').hide();
+                    $('#btn-finalizar-venda').prop('disabled', false);
+                    $('#status-caixa-aberto').show();
+                    $('#form-abrir-caixa').hide();
+                    $('#caixa-funcionario').text(dados.funcionario || 'N/A');
+                    $('#caixa-data-abertura').text(dados.data_abertura || 'N/A');
                 } else {
-                    valorDescontoFinal = parseFloat(descontoInput.replace("R$", "").replace(/\./g, '').replace(",", ".")) || 0;
+                    idCaixaAtual = null;
+                    $('#status-caixa-info').html(`
+                        <span class="badge bg-danger fs-6">
+                            <i class="bi bi-x-circle me-1"></i>Caixa Fechado
+                        </span>
+                    `);
+                    $('#alerta-caixa-fechado').show();
+                    $('#btn-finalizar-venda').prop('disabled', true);
+                    $('#status-caixa-aberto').hide();
+                    $('#form-abrir-caixa').show();
+                }
+            }
+
+            function calcularTotais() {
+                let subtotal = 0;
+                $('#tabela-itens-venda tbody tr').each(function() {
+                    const qtd = parseInt($(this).find('.input-quantidade').val()) || 0;
+                    const valorUnitario = parseFloat($(this).data('valor-unitario')) || 0;
+                    const itemSubtotal = qtd * valorUnitario;
+                    subtotal += itemSubtotal;
+                    $(this).find('.subtotal-item').text(formatCurrency(itemSubtotal));
+                });
+
+                const desconto = (parseFloat($('#input-desconto').val()) * subtotal) / 100 || 0;
+                const total = subtotal - desconto;
+
+                $('#resumo-subtotal').text(formatCurrency(subtotal));
+                $('#resumo-total').text(formatCurrency(total));
+                $('#total-itens-rodape').text(formatCurrency(subtotal));
+            }
+
+            // ===== CONTROLE DE ENCOMENDA =====
+            $('#check-encomenda').on('change', function() {
+                if ($(this).is(':checked')) {
+                    $('#div-data-encomenda').slideDown();
+                    $('#cliente-obrigatorio').show();
+                    $('#search-cliente').attr('required', true);
+                } else {
+                    $('#div-data-encomenda').slideUp();
+                    $('#cliente-obrigatorio').hide();
+                    $('#search-cliente').attr('required', false);
+                }
+            });
+
+            // ===== CONTROLE DE QUANTIDADE E REMOÇÃO =====
+            $(document).on('input', '.input-quantidade', calcularTotais);
+            $(document).on('click', '.btn-remover-item', function() {
+                $(this).closest('tr').remove();
+                calcularTotais();
+            });
+
+            $('#input-desconto').on('input', calcularTotais);
+
+           
+            // ===== FORMAS DE PAGAMENTO =====
+            async function carregarFormasPagamento() {
+                try {
+                    const response = await fetch('@Url.Action("ListarFormasPagamento", "Vendas")');
+                    const formas = await response.json();
+                    const select = $('#select-pagamento');
+                    select.empty().append('<option value="" selected disabled>Selecione...</option>');
+                    formas.forEach(forma => {
+                        select.append(new Option(forma.nome_forma, forma.id_forma_pagamento));
+                    });
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            $('#select-pagamento').on('change', function() {
+                const formaSelecionada = $(this).find('option:selected').text().toLowerCase();
+                if (formaSelecionada.includes('cartão') || formaSelecionada.includes('cartao') || formaSelecionada.includes('crédito') || formaSelecionada.includes('credito')) {
+                    $('#div-parcelas').slideDown();
+                } else {
+                    $('#div-parcelas').slideUp();
+                }
+            });
+
+            $('#btn-salvar-forma-pagamento').on('click', async function() {
+                const dto = {
+                    nome_forma: $('#nome_forma').val(),
+                    descricao: $('#descricao_forma').val()
+                };
+                try {
+                    const response = await fetch('@Url.Action("CadastrarFormaPagamento", "Vendas")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(dto)
+                    });
+                    const novaForma = await response.json();
+                    $('#select-pagamento').append(new Option(novaForma.nome_forma, novaForma.id_forma_pagamento, true, true));
+                    bootstrap.Modal.getInstance($('#modalNovaFormaPagamento')).hide();
+                    $('#form-nova-forma-pagamento')[0].reset();
+                } catch (error) {
+                    alert("Erro ao salvar forma de pagamento.");
+                }
+            });
+
+            // ===== FINALIZAR VENDA =====
+            $('#form-registrar-venda').on('submit', async function(e) {
+                e.preventDefault();
+
+                if (!caixaAberto) {
+                    alert('Você precisa abrir o caixa antes de registrar uma venda!');
+                    return;
                 }
 
-                let totalFinal = subtotal - valorDescontoFinal;
+                // TODO: Implementar envio da venda
+                alert('Venda registrada com sucesso!');
+            });
 
-                $('#resumo-subtotal').text(formatCurrency(subtotal)); // Subtotal é o valor bruto
-                $('#resumo-total').text(formatCurrency(totalFinal));
-        }
+            $('#btn-limpar').on('click', function() {
+                if (confirm('Deseja limpar todos os campos?')) {
+                    $('#form-registrar-venda')[0].reset();
+                    calcularTotais();
+                }
+            });
 
-        async function carregarFormasPagamento() {
-            const select = $('#select-pagamento');
-            select.prop('disabled', true).html('<option>A carregar...</option>');
-            try {
-                const response = await fetch('@Url.Action("ListarFormasPagamento", "Vendas")');
-                if (!response.ok) throw new Error('Falha ao carregar formas de pagamento');
-                const formas = await response.json();
-
-                select.empty().append('<option value="" selected disabled>Selecione...</option>');
-                formas.forEach(forma => {
-                    select.append(new Option(forma.nome_forma, forma.id_forma_pagamento));
-                });
-                select.prop('disabled', false);
-            } catch (error) {
-                console.error(error);
-                select.html('<option>Erro ao carregar</option>');
-            }
-        }
-
-        $('#btn-salvar-forma-pagamento').on('click', async function() {
-            const form = $('#form-nova-forma-pagamento');
-            if (!form[0].checkValidity()) {
-                form[0].reportValidity();
-                return;
-            }
-
-            const dto = {
-                nome_forma: $('#nome_forma').val(),
-                descricao: $('#descricao_forma').val()
-            };
-
-            try {
-                const response = await fetch('@Url.Action("CadastrarFormaPagamento", "Vendas")', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dto)
-                });
-
-                if (!response.ok) throw new Error('Falha ao salvar');
-
-                const novaForma = await response.json();
-
-                const option = new Option(novaForma.nome_forma, novaForma.id_forma_pagamento, true, true);
-                $('#select-pagamento').append(option).trigger('change');
-
-                var modal = bootstrap.Modal.getInstance(document.getElementById('modalNovaFormaPagamento'));
-                modal.hide();
-                form[0].reset();
-            } catch (error) {
-                alert("Ocorreu um erro ao salvar a forma de pagamento.");
-                console.error(error);
-            }
+            // ===== INICIALIZAÇÃO =====
+            calcularTotais();
+            carregarFormasPagamento();
         });
-
-        $('#input-desconto').on('keyup change', calcularTotais);
-
-        // Carga Inicial
-        calcularTotais();
-        carregarFormasPagamento();
-    });
     </script>
 }

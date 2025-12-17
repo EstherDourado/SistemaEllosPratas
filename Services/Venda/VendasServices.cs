@@ -19,6 +19,7 @@ namespace EllosPratas.Services.Venda
             _context = context;
         }
 
+        // ========== MÉTODOS DE BUSCA DE PRODUTOS ==========
         public async Task<List<ProdutoBuscaDto>> BuscarProdutoPorNome(string termoBusca)
         {
             if (string.IsNullOrWhiteSpace(termoBusca))
@@ -31,23 +32,22 @@ namespace EllosPratas.Services.Venda
             var produtos = await _context.Produtos
                 .Where(p => p.nome_produto.ToLower().Contains(termoBuscaLower) && p.ativo)
                 .OrderBy(p => p.nome_produto)
-                .Take(10) // Limita a 10 resultados para o autocomplete
+                .Take(10)
                 .Select(p => new ProdutoBuscaDto
                 {
                     id_produto = p.id_produto,
                     nome_produto = p.nome_produto,
-                    valor_unitario = p.valor_unitario, // Adicionado para uso no front-end
-                    // Converte a imagem para Base64 se ela existir, pronta para ser usada no src de uma <img>
+                    valor_unitario = p.valor_unitario,
                     ImagemBase64 = p.imagem != null ? $"data:image/png;base64,{Convert.ToBase64String(p.imagem)}" : null
                 })
                 .ToListAsync();
 
             return produtos;
         }
+
+        // ========== MÉTODOS DE VENDA ==========
         public async Task<VendasModel> RegistrarVenda(VendasRegistrarDto dto)
         {
-            // Usar uma transação garante que todas as operações (Venda, Estoque, Caixa)
-            // sejam concluídas com sucesso. Se uma falhar, todas são revertidas.
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
@@ -58,7 +58,6 @@ namespace EllosPratas.Services.Venda
                     if (dto.id_caixa <= 0)
                         throw new Exception("Caixa inválido. Por favor, abra o caixa antes de registrar vendas.");
 
-                    // 1. Criar a Venda
                     var novaVenda = new VendasModel
                     {
                         id_loja = dto.id_loja,
@@ -72,7 +71,6 @@ namespace EllosPratas.Services.Venda
 
                     decimal valorTotalCalculado = 0;
 
-                    // 2. Processar Itens e Atualizar Estoque
                     foreach (var itemDto in dto.Itens)
                     {
                         var produto = await _context.Produtos.FindAsync(itemDto.id_produto);
@@ -82,7 +80,6 @@ namespace EllosPratas.Services.Venda
                         if (estoque == null || estoque.quantidade < itemDto.quantidade)
                             throw new Exception($"Estoque insuficiente para o produto '{produto.nome_produto}'.");
 
-                        // Abater do estoque
                         estoque.quantidade -= itemDto.quantidade;
                         _context.Estoque.Update(estoque);
 
@@ -100,20 +97,17 @@ namespace EllosPratas.Services.Venda
                     novaVenda.valor_total = valorTotalCalculado;
 
                     _context.Vendas.Add(novaVenda);
-                    await _context.SaveChangesAsync(); // Salva a venda para obter o ID da venda
+                    await _context.SaveChangesAsync();
 
-                    // 3. Criar o Pagamento associado à Venda
                     var novoPagamento = new PagamentoModel
                     {
                         id_venda = novaVenda.id_venda,
                         id_forma_pagamento = dto.id_forma_pagamento,
                         valor_pago = novaVenda.valor_total - novaVenda.valor_desconto,
                         quantidade_parcelas = dto.quantidade_parcela,
-                        // Adicionar outros campos de pagamento conforme necessário
                     };
                     _context.Pagamentos.Add(novoPagamento);
 
-                    // 4. Registrar a Entrada no Caixa
                     var movimentacao = new MovimentacaoCaixaModel
                     {
                         id_caixa = dto.id_caixa,
@@ -124,19 +118,15 @@ namespace EllosPratas.Services.Venda
                     };
                     _context.MovimentacaoCaixa.Add(movimentacao);
 
-                    // Salva todas as alterações pendentes (Estoque, Pagamento, Caixa)
                     await _context.SaveChangesAsync();
-
-                    // Se tudo correu bem, confirma a transação
                     await transaction.CommitAsync();
 
                     return novaVenda;
                 }
                 catch (Exception)
                 {
-                    // Se algo deu errado, desfaz todas as operações
                     await transaction.RollbackAsync();
-                    throw; // Propaga a exceção para ser tratada pelo Controller
+                    throw;
                 }
             }
         }
@@ -173,13 +163,18 @@ namespace EllosPratas.Services.Venda
                .ToListAsync();
         }
 
+        public Task<List<VendasModel>> VisualizaVendasAbertas()
+        {
+            throw new NotImplementedException();
+        }
+
+        // ========== MÉTODOS DE DESCONTO ==========
         public async Task<List<DescontoDto>> ListarDescontos()
         {
             return await _context.Descontos
-                .Where(d => d.ativo_desconto) // Lista apenas descontos ativos
+                .Where(d => d.ativo_desconto)
                 .Select(d => new DescontoDto
                 {
-                    // Usar os nomes corretos das propriedades do DescontoModel
                     Id = d.id_desconto,
                     Nome = d.nome_desconto,
                     Tipo = d.tipo_desconto,
@@ -192,7 +187,6 @@ namespace EllosPratas.Services.Venda
         {
             var desconto = new DescontoModel
             {
-                // Usar os nomes corretos das propriedades do DescontoModel
                 nome_desconto = dto.Nome,
                 tipo_desconto = dto.Tipo,
                 valor_desconto = dto.Valor,
@@ -202,7 +196,6 @@ namespace EllosPratas.Services.Venda
             _context.Descontos.Add(desconto);
             await _context.SaveChangesAsync();
 
-            // Retorna o DTO com os dados do objeto que acabou de ser salvo
             return new DescontoDto
             {
                 Id = desconto.id_desconto,
@@ -212,12 +205,7 @@ namespace EllosPratas.Services.Venda
             };
         }
 
-        public Task<List<VendasModel>> VisualizaVendasAbertas()
-        {
-            throw new NotImplementedException();
-        }
-
-
+        // ========== MÉTODOS DE FORMA DE PAGAMENTO ==========
         public async Task<List<FormaPagamentoModel>> ListarFormasPagamento()
         {
             return await _context.FormaPagamento.OrderBy(fp => fp.nome_forma).ToListAsync();
@@ -241,5 +229,6 @@ namespace EllosPratas.Services.Venda
 
             return novaForma;
         }
+     
     }
 }

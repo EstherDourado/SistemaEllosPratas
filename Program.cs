@@ -4,6 +4,10 @@ using EllosPratas.Services.Categoria;
 using EllosPratas.Services.Loja;
 using EllosPratas.Services.Produtos;
 using EllosPratas.Services.Venda;
+//using EllosPratas.Services.Cliente;
+//using EllosPratas.Services.Estoque;
+//using EllosPratas.Services.Funcionario;
+using EllosPratas.Services.Caixa;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +40,8 @@ builder.Services.AddScoped<ICarrinhoInterface, CarrinhoServices>();
 builder.Services.AddScoped<IVendasInterface, VendasServices>();
 builder.Services.AddScoped<ILojaInterface, LojaService>();
 builder.Services.AddScoped<IFuncionariosInterface, FuncionarioService>();
+//builder.Services.AddScoped<IEstoqueInterface, EstoqueService>();
+builder.Services.AddScoped<ICaixaInterface, CaixaService>();
 
 var cultureInfo = new System.Globalization.CultureInfo("pt-BR");
 System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
