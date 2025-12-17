@@ -127,15 +127,15 @@ namespace EllosPratas.Controllers
             return View(listaDeLojas);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListarLojasParaSelect()
-        {
-            // Busca apenas os dados necessários (ID e Nome)
-            var lojas = await _context.Loja
-                                      .OrderBy(l => l.nome_loja)
-                                      .Select(l => new { id = l.id_loja, text = l.nome_loja })
-                                      .ToListAsync();
-            return Json(lojas); // Retorna em formato JSON
-        }
+//         [HttpGet]
+//         public async Task<IActionResult> ListarLojasParaSelect()
+//         {
+//             // Busca apenas os dados necessários (ID e Nome)
+//             var lojas = await _context.Loja
+//                                       .OrderBy(l => l.nome_loja)
+//                                       .Select(l => new { id = l.id_loja, text = l.nome_loja })
+//                                       .ToListAsync();
+//             return Json(lojas); // Retorna em formato JSON
+//         }
     }
 }
