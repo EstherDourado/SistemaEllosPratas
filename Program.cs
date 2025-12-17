@@ -4,11 +4,12 @@ using EllosPratas.Services.Categoria;
 using EllosPratas.Services.Loja;
 using EllosPratas.Services.Produtos;
 using EllosPratas.Services.Venda;
+using EllosPratas.Services.Caixa;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adiciona os serviços do MVC e o suporte ao Newtonsoft.Json
+// Adiciona os serviÃ§os do MVC e o suporte ao Newtonsoft.Json
 builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
     {
@@ -20,7 +21,7 @@ builder.Services.AddDbContext<BancoContext>(options =>
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // O carrinho expira após 30 min de inatividade
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // O carrinho expira apÃ³s 30 min de inatividade
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -28,7 +29,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpContextAccessor();
 
 
-//Configurando a injeção de dependência
+//Configurando a injeÃ§Ã£o de dependÃªncia
 builder.Services.AddScoped<IProdutosInterface, ProdutosService>();
 builder.Services.AddScoped<IClientesInterface, ClienteService>();
 builder.Services.AddScoped<ICategoriasInterface, CategoriasServices>();
@@ -36,6 +37,7 @@ builder.Services.AddScoped<ICarrinhoInterface, CarrinhoServices>();
 builder.Services.AddScoped<IVendasInterface, VendasServices>();
 builder.Services.AddScoped<ILojaInterface, LojaService>();
 builder.Services.AddScoped<IFuncionariosInterface, FuncionarioService>();
+builder.Services.AddScoped<ICaixaInterface, CaixaService>();
 
 var cultureInfo = new System.Globalization.CultureInfo("pt-BR");
 System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;

@@ -13,9 +13,13 @@ public class FuncionarioService : IFuncionariosInterface {
         _context = context;
     }
 
-    public async Task<IEnumerable<FuncionarioModel>> GetFuncionarios() {
-        // Incluindo navegação para Loja e Nível de Acesso (opcional)
-        // return await _context.Funcionarios.Include(f => f.Loja).Include(f => f.NivelAcesso).AsNoTracking().ToListAsync();
+    public async Task<IEnumerable<FuncionarioModel>> GetFuncionarios()
+    {
+        //return await _context.Funcionarios
+        //    .AsNoTracking()
+        //    .Include(f => f.Loja)  
+        //    .ToListAsync();
+
         return await _context.Funcionarios.AsNoTracking().ToListAsync();
     }
 
@@ -64,7 +68,17 @@ public class FuncionarioService : IFuncionariosInterface {
     }
 
     // Métodos para popular os Dropdowns na View
-    public async Task<IEnumerable<LojaModel>> GetLojas() {
+    public async Task<IEnumerable<LojaModel>> GetLojas()
+    {
+        //return await _context.Loja
+        //    .AsNoTracking()
+        //    .Select(l => new LojaModel
+        //    {
+        //        id_loja = l.id_loja,
+        //        nome_loja = l.nome_loja
+        //    })
+        //    .ToListAsync();
+
         return await _context.Loja.AsNoTracking().ToListAsync();
     }
 

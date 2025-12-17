@@ -35,7 +35,7 @@ namespace EllosPratas.Services.Loja
                     {
                         nome_loja = dto.nome_loja,
                         telefone = dto.telefone,
-                        id_endereco = "0" // Temporário
+                        id_endereco = 0 // Temporário
                     };
                     _context.Loja.Add(novaLoja);
                     await _context.SaveChangesAsync(); // Salva para obter o id_loja
@@ -54,7 +54,7 @@ namespace EllosPratas.Services.Loja
                     await _context.SaveChangesAsync(); // Salva o endereço
 
                     // 4. Atualiza o id_endereco na Loja
-                    novaLoja.id_endereco = novoEndereco.id_endereco.ToString();
+                    novaLoja.id_endereco = novoEndereco.id_endereco;
                     await _context.SaveChangesAsync();
 
                     // 5. Confirma a transação
