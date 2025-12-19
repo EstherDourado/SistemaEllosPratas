@@ -4,6 +4,9 @@ using EllosPratas.Services.Categoria;
 using EllosPratas.Services.Loja;
 using EllosPratas.Services.Produtos;
 using EllosPratas.Services.Venda;
+//using EllosPratas.Services.Cliente;
+//using EllosPratas.Services.Estoque;
+//using EllosPratas.Services.Funcionario;
 using EllosPratas.Services.Caixa;
 using Microsoft.EntityFrameworkCore;
 

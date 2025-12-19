@@ -5,9 +5,9 @@ namespace EllosPratas.Models
     public class LojaModel
     {
         [Key]
-        public int id_loja { get; set; }
+        public int Id_loja { get; set; }
         public required string nome_loja { get; set; }
-        public int id_endereco { get; set; } 
+        public int? Id_endereco { get; set; } 
         public string telefone { get; set; }
 
         public EnderecoModel Endereco { get; set; } // Relação 1-para-1
