@@ -6,17 +6,17 @@ namespace EllosPratas.Models
     public class ProdutosModel
     {
         [Key]
-        public int id_produto { get; set; }
-        public string codigo_barras { get; set; } = string.Empty;
-        public required string nome_produto { get; set; }
-        public int id_categoria { get; set; }
-        public string? descricao { get; set; } = string.Empty;
-        public decimal valor_unitario { get; set; }
-        public bool ativo { get; set; }
-        public byte[]? imagem { get; set; }
-        public int quantidade { get; set; }
+        public int Id_produto { get; set; }
+        public string Codigo_barras { get; set; } = string.Empty;
+        public required string Nome_produto { get; set; }
+        public int Id_categoria { get; set; }
+        public string? Descricao { get; set; } = string.Empty;
+        public decimal Valor_unitario { get; set; }
+        public bool Ativo { get; set; }
+        public byte[]? Imagem { get; set; }
+        public int Quantidade { get; set; }
 
-        [ForeignKey("id_categoria")]
+        [ForeignKey("Id_categoria")]
         public CategoriaModel? Categoria { get; set; }
 
         // Propriedade de Navegação para Estoque (relação 1-para-1)

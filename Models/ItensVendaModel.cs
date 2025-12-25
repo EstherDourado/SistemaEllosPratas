@@ -6,18 +6,18 @@ namespace EllosPratas.Models
     public class ItensVendaModel
     {
         [Key]
-        public int id_item_venda { get; set; }
-        public int id_venda { get; set; }
-        public int id_produto { get; set; }
-        public int quantidade { get; set; }
-        public decimal valor_total { get; set; }
-        public decimal valor_unitario { get; set; }
-        public decimal subtotal { get; set; }
+        public int Id_item_venda { get; set; }
+        public int Id_venda { get; set; }
+        public int Id_produto { get; set; }
+        public int Quantidade { get; set; }
+        public decimal Valor_total { get; set; }
+        public decimal Valor_unitario { get; set; }
+        public decimal Subtotal { get; set; }
 
         [ForeignKey("id_venda")]
-        public VendasModel Venda { get; set; }
+        public VendasModel? Venda { get; set; }
 
         [ForeignKey("id_produto")]
-        public ProdutosModel Produto { get; set; }
+        public ProdutosModel? Produto { get; set; }
     }
 }

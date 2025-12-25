@@ -43,13 +43,12 @@ namespace EllosPratas.Controllers {
 
             try {
                 var clienteDto = new ClienteDto {
-                    // ... seu mapeamento de DTO ...
-                    id_cliente = cliente.id_cliente,
-                    nome_cliente = cliente.nome_cliente,
-                    email = cliente.email,
-                    telefone = cliente.telefone,
-                    cpf = cliente.cpf,
-                    ativo = cliente.ativo
+                    Id_cliente = cliente.Id_cliente,
+                    Nome_cliente = cliente.Nome_cliente,
+                    Email = cliente.Email,
+                    Telefone = cliente.Telefone,
+                    Cpf = cliente.Cpf,
+                    Ativo = cliente.Ativo
                 };
 
                 return View("Cadastrar", clienteDto);

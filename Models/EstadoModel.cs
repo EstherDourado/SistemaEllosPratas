@@ -6,9 +6,9 @@ namespace EllosPratas.Models
     public class EstadoModel
     {
         [Key]
-        public int id_estado { get; set; }
-        public required string uf { get; set; }
-        public required string nome_estado { get; set; }
+        public int Id_estado { get; set; }
+        public required string Uf { get; set; }
+        public required string Nome_estado { get; set; }
 
         // Propriedade de Navegação
         public List<CidadeModel> Cidades { get; set; } = new List<CidadeModel>();

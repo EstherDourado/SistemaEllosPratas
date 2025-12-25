@@ -24,7 +24,7 @@ namespace EllosPratas.Controllers
             var produto = await _produtoInterface.GetProdutoPorId(produtoId);
             if (produto == null) return NotFound(new { success = false, message = "Produto não encontrado." });
 
-            _carrinhoService.AdicionarProduto(produtoId, produto.nome_produto, produto.valor_unitario, 1);
+            _carrinhoService.AdicionarProduto(produtoId, produto.Nome_produto, produto.Valor_unitario, 1);
 
             return PartialView("~/Views/Vendas/Carrinho.cshtml", _carrinhoService.GetCarrinho());
         }

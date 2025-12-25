@@ -5,13 +5,13 @@ namespace EllosPratas.Models
     public class ClienteModel
     {
         [Key]
-        public int id_cliente { get; set; }
-        public required string nome_cliente { get; set; }
-        public string? telefone { get; set; }
-        public string? email { get; set; }
-        public required string cpf { get; set; }
-        public bool ativo { get; set; }
-        public DateTime data_cadastro { get; set; }
+        public int Id_cliente { get; set; }
+        public required string Nome_cliente { get; set; }
+        public string? Telefone { get; set; }
+        public string? Email { get; set; }
+        public required string Cpf { get; set; }
+        public bool Ativo { get; set; }
+        public DateTime Data_cadastro { get; set; }
 
         public List<VendasModel> Vendas { get; set; } = new List<VendasModel>();
     }

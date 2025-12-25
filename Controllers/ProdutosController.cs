@@ -31,8 +31,8 @@ namespace EllosPratas.Controllers
         {
             return View(new ProdutosCriacaoDto
             {
-                nome_produto = string.Empty,
-                descricao = string.Empty
+                Nome_produto = string.Empty,
+                Descricao = string.Empty
             });
         }
 
@@ -49,19 +49,19 @@ namespace EllosPratas.Controllers
             try
             {
 
-                if (decimal.TryParse(produtosCriacaoDto.valor_unitario.ToString(),
+                if (decimal.TryParse(produtosCriacaoDto.Valor_unitario.ToString(),
                     System.Globalization.NumberStyles.Number,
                     new System.Globalization.CultureInfo("pt-BR"),
                     out decimal valorConvertido))
                 {
-                    produtosCriacaoDto.valor_unitario = Math.Round(valorConvertido, 2);
+                    produtosCriacaoDto.Valor_unitario = Math.Round(valorConvertido, 2);
                 }
                 else
                 {
                     return Json(new { success = false, message = "Erro ao converter o valor do preço. Verifique o formato." });
                 }
 
-                await _produtosInterface.CadastrarProduto(produtosCriacaoDto, produtosCriacaoDto.imagem);
+                await _produtosInterface.CadastrarProduto(produtosCriacaoDto, produtosCriacaoDto.Imagem);
 
                 return Json(new { success = true, message = "Produto cadastrado com sucesso!" });
             }
@@ -79,18 +79,18 @@ namespace EllosPratas.Controllers
 
             var produtoDto = new ProdutosEdicaoDto()
             {
-                id_produto = produto.id_produto,
-                nome_produto = produto.nome_produto,
-                descricao = produto.descricao,
-                id_categoria = produto.id_categoria,
-                valor_unitario = produto.valor_unitario,
-                ativo = produto.ativo,
-                quantidade = produto.Estoque?.quantidade ?? 0
+                Id_produto = produto.Id_produto,
+                Nome_produto = produto.Nome_produto,
+                Descricao = produto.Descricao,
+                Id_categoria = produto.Id_categoria,
+                Valor_unitario = produto.Valor_unitario,
+                Ativo = produto.Ativo,
+                Quantidade = produto.Estoque?.Quantidade ?? 0
             };
 
-            if (produto.imagem != null)
+            if (produto.Imagem != null)
             {
-                ViewBag.ImagemAtualBase64 = Convert.ToBase64String(produto.imagem);
+                ViewBag.ImagemAtualBase64 = Convert.ToBase64String(produto.Imagem);
             }
 
             return View("Editar", produtoDto); 

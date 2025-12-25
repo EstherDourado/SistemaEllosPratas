@@ -2,13 +2,13 @@
 {
     public class ProdutosEdicaoDto
     {
-        public int id_produto { get; set; }
-        public string nome_produto { get; set; }
-        public string? descricao { get; set; }
-        public decimal valor_unitario { get; set; }
-        public int quantidade { get; set; }
-        public int id_categoria { get; set; }
-        public bool ativo { get; set; }
-        public IFormFile? imagem { get; set; }
+        public int Id_produto { get; set; }
+        public string? Nome_produto { get; set; }
+        public string? Descricao { get; set; }
+        public decimal Valor_unitario { get; set; }
+        public int Quantidade { get; set; }
+        public int Id_categoria { get; set; }
+        public bool Ativo { get; set; }
+        public IFormFile? Imagem { get; set; }
     }
 }

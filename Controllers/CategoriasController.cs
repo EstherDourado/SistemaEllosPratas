@@ -30,9 +30,9 @@ namespace EllosPratas.Controllers
 
             var categoriasDto = categoriasDoBanco.Select(cat => new CategoriaCriacaoDto
             {
-                id_categoria = cat.id_categoria,
-                nome_categoria = cat.nome_categoria,
-                ativo = cat.ativo
+                Id_categoria = cat.Id_categoria,
+                Nome_categoria = cat.Nome_categoria,
+                Ativo = cat.Ativo
             }).ToList();
 
             return Ok(categoriasDto);
@@ -49,7 +49,7 @@ namespace EllosPratas.Controllers
             try
             {
                 var novaCategoria = await _categoriasInterface.AddCategoria(categoriaDto);
-                return Ok(new { id = novaCategoria.id_categoria, text = novaCategoria.nome_categoria });
+                return Ok(new { id = novaCategoria.Id_categoria, text = novaCategoria.Nome_categoria });
             }
             catch (System.InvalidOperationException ex) 
             {

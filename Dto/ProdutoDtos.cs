@@ -6,9 +6,9 @@ namespace EllosPratas.Dto.Produto
 {
     public class ProdutoBuscaDto
     {
-        public int id_produto { get; set; }
-        public string nome_produto { get; set; }
-        public decimal valor_unitario { get; set; }
+        public int Id_produto { get; set; }
+        public string? Nome_produto { get; set; }
+        public decimal Valor_unitario { get; set; }
         public string? ImagemBase64 { get; set; }
     }
 
@@ -23,25 +23,25 @@ namespace EllosPratas.Dto.Produto
 
     public class ProdutoListagemDto
     {
-        public int id_produto { get; set; }
-        public string nome_produto { get; set; }
-        public string? descricao { get; set; }
-        public decimal valor_unitario { get; set; }
-        public bool ativo { get; set; }
-        public int quantidade { get; set; }
+        public int Id_produto { get; set; }
+        public string? Nome_produto { get; set; }
+        public string? Descricao { get; set; }
+        public decimal Valor_unitario { get; set; }
+        public bool Ativo { get; set; }
+        public int Quantidade { get; set; }
         public string? ImagemBase64 { get; set; }
     }
 
     public class CategoriaComProdutosDto
     {
-        public int idCategoria { get; set; }
-        public string nomeCategoria { get; set; }
-        public List<ProdutoListagemDto> Produtos { get; set; }
+        public int IdCategoria { get; set; }
+        public string? NomeCategoria { get; set; }
+        public List<ProdutoListagemDto>? Produtos { get; set; }
     }
 
     public class FiltroProdutosResultadoDto
     {
-        public List<CategoriaComProdutosDto> Categorias { get; set; }
+        public List<CategoriaComProdutosDto>? Categorias { get; set; }
         public int TotalProdutos { get; set; }
         public int PaginaAtual { get; set; }
         public int TotalPaginas { get; set; }

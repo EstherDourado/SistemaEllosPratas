@@ -51,15 +51,15 @@ namespace EllosPratas.Controllers
         [HttpGet]
         public async Task<IActionResult> ListarEstados(string q)
         {
-            var query = _context.Estados.OrderBy(e => e.nome_estado).AsQueryable();
+            var query = _context.Estados.OrderBy(e => e.Nome_estado).AsQueryable();
 
             if (!string.IsNullOrEmpty(q))
             {
-                query = query.Where(e => e.nome_estado.Contains(q) || e.uf.Contains(q));
+                query = query.Where(e => e.Nome_estado.Contains(q) || e.Uf.Contains(q));
             }
 
             var estados = await query
-                .Select(e => new { id = e.id_estado, text = e.nome_estado + " - " + e.uf })
+                .Select(e => new { id = e.Id_estado, text = e.Nome_estado + " - " + e.Uf })
                 .ToListAsync();
 
             return Ok(estados);
@@ -68,15 +68,15 @@ namespace EllosPratas.Controllers
         [HttpGet]
         public async Task<IActionResult> ListarCidades(int estadoId, string q)
         {
-            var query = _context.Cidades.Where(c => c.id_estado == estadoId).OrderBy(c => c.nome_cidade).AsQueryable();
+            var query = _context.Cidades.Where(c => c.Id_estado == estadoId).OrderBy(c => c.Nome_cidade).AsQueryable();
 
             if (!string.IsNullOrEmpty(q))
             {
-                query = query.Where(c => c.nome_cidade.Contains(q));
+                query = query.Where(c => c.Nome_cidade.Contains(q));
             }
 
             var cidades = await query
-                .Select(c => new { id = c.id_cidade, text = c.nome_cidade })
+                .Select(c => new { id = c.Id_cidade, text = c.Nome_cidade })
                 .ToListAsync();
             return Ok(cidades);
         }
@@ -89,11 +89,11 @@ namespace EllosPratas.Controllers
                 return NotFound();
             }
 
-            var cidade = await _context.Cidades.Include(c => c.Estado).FirstOrDefaultAsync(c => c.id_cidade == lojaDto.id_cidade);
+            var cidade = await _context.Cidades.Include(c => c.Estado).FirstOrDefaultAsync(c => c.Id_cidade == lojaDto.Id_cidade);
             if (cidade != null)
             {
-                ViewBag.EstadoNome = $"{cidade.Estado.nome_estado} - {cidade.Estado.uf}";
-                ViewBag.CidadeNome = cidade.nome_cidade;
+                ViewBag.EstadoNome = $"{cidade.Estado.Nome_estado} - {cidade.Estado.Uf}";
+                ViewBag.CidadeNome = cidade.Nome_cidade;
             }
 
             return View(lojaDto);

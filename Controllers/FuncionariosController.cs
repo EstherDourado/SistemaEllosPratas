@@ -25,8 +25,8 @@ namespace EllosPratas.Controllers {
             var lojas = (await _funcionariosInterface.GetLojas()) ?? Enumerable.Empty<LojaModel>();
             var niveisAcesso = (await _funcionariosInterface.GetNiveisAcesso()) ?? Enumerable.Empty<NivelAcessoModel>();
 
-            ViewBag.Lojas = new SelectList(lojas, "id_loja", "nome_loja", dto?.id_loja);
-            ViewBag.NiveisAcesso = new SelectList(niveisAcesso, "id_nivel_acesso", "nome_nivel", dto?.id_nivel_acesso);
+            ViewBag.Lojas = new SelectList(lojas, "id_loja", "nome_loja", dto?.Id_loja);
+            ViewBag.NiveisAcesso = new SelectList(niveisAcesso, "id_nivel_acesso", "nome_nivel", dto?.Id_nivel_acesso);
         }
 
         public async Task<IActionResult> Cadastrar() {
@@ -43,7 +43,7 @@ namespace EllosPratas.Controllers {
             }
             try {
                 // Remove a máscara do CPF antes de salvar
-                funcionarioDto.cpf = funcionarioDto.cpf.Replace(".", "").Replace("-", "");
+                funcionarioDto.Cpf = funcionarioDto.Cpf.Replace(".", "").Replace("-", "");
 
                 await _funcionariosInterface.CadastrarFuncionario(funcionarioDto);
                 return Ok(new { success = true, message = "Funcionário cadastrado com sucesso!" });
@@ -63,11 +63,11 @@ namespace EllosPratas.Controllers {
             }
 
             var funcionarioDto = new FuncionarioDto {
-                id_funcionario = funcionario.id_funcionario,
-                id_nivel_acesso = funcionario.id_nivel_acesso,
-                id_loja = funcionario.id_loja,
-                nome = funcionario.nome_funcionario,
-                cpf = funcionario.cpf
+                Id_funcionario = funcionario.Id_funcionario,
+                Id_nivel_acesso = funcionario.Id_nivel_acesso,
+                Id_loja = funcionario.Id_loja,
+                Nome = funcionario.Nome_funcionario,
+                Cpf = funcionario.Cpf
             };
 
             await PrepareCadastroView(funcionarioDto);
@@ -84,7 +84,7 @@ namespace EllosPratas.Controllers {
 
             try {
                 // Remove a máscara do CPF antes de salvar
-                funcionarioDto.cpf = funcionarioDto.cpf.Replace(".", "").Replace("-", "");
+                funcionarioDto.Cpf = funcionarioDto.Cpf.Replace(".", "").Replace("-", "");
 
                 await _funcionariosInterface.AtualizarFuncionario(funcionarioDto);
                 return Ok(new { success = true, message = "Funcionário atualizado com sucesso!" });

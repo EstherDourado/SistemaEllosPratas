@@ -6,15 +6,15 @@ namespace EllosPratas.Models
     public class EstoqueModel
     {
         [Key]   
-        public int id_estoque { get; set; }
-        public int id_produto { get; set; }
-        public int quantidade { get; set; }
-        public int? quantidade_entrada { get; set; }
-        public int? quantidade_saida { get; set; }
-        public DateTime? data_entrada { get; set; }
-        public DateTime? data_saida { get; set; }
+        public int Id_estoque { get; set; }
+        public int Id_produto { get; set; }
+        public int Quantidade { get; set; }
+        public int? Quantidade_entrada { get; set; }
+        public int? Quantidade_saida { get; set; }
+        public DateTime? Data_entrada { get; set; }
+        public DateTime? Data_saida { get; set; }
 
-        [ForeignKey("id_produto")]
-        public ProdutosModel Produto { get; set; }
+        [ForeignKey("Id_produto")]
+        public ProdutosModel? Produto { get; set; }
     }
 }

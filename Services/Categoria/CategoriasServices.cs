@@ -7,37 +7,30 @@ using System.Threading.Tasks;
 
 namespace EllosPratas.Services.Categoria
 {
-    public class CategoriasServices : ICategoriasInterface
+    public class CategoriasServices(BancoContext context) : ICategoriasInterface
     {
-        private readonly BancoContext _context;
-
-        public CategoriasServices(BancoContext context)
-        {
-            _context = context;
-        }
-
         public async Task<List<CategoriaModel>> GetCategorias()
         {
-            return await _context.Categorias.ToListAsync();
+            return await context.Categorias.ToListAsync();
         }
 
         public async Task<CategoriaModel> GetCategoriaById(int id)
         {
-            return await _context.Categorias.FindAsync(id);
+            return await context.Categorias.FindAsync(id);
         }
 
         // Método para o Select2
         public async Task<object> GetCategoriasParaSelect()
         {
-            return await _context.Categorias
-                .Where(c => c.ativo)
-                .Select(c => new { id = c.id_categoria, text = c.nome_categoria })
+            return await context.Categorias
+                .Where(c => c.Ativo)
+                .Select(c => new { id = c.Id_categoria, text = c.Nome_categoria })
                 .ToListAsync();
         }
 
         public async Task<CategoriaModel> AddCategoria(CategoriaCriacaoDto categoriaDto)
         {
-            var existe = await _context.Categorias.AnyAsync(c => c.nome_categoria.ToLower() == categoriaDto.nome_categoria.ToLower());
+            var existe = await context.Categorias.AnyAsync(c => c.Nome_categoria.ToLower() == categoriaDto.Nome_categoria.ToLower());
             if (existe)
             {
                 throw new System.InvalidOperationException("Esta categoria já existe.");
@@ -45,34 +38,34 @@ namespace EllosPratas.Services.Categoria
 
             var categoria = new CategoriaModel
             {
-                nome_categoria = categoriaDto.nome_categoria,
-                ativo = true // Categoria sempre nasce ativa
+                Nome_categoria = categoriaDto.Nome_categoria,
+                Ativo = true // Categoria sempre nasce ativa
             };
 
-            _context.Categorias.Add(categoria);
-            await _context.SaveChangesAsync();
+            context.Categorias.Add(categoria);
+            await context.SaveChangesAsync();
             return categoria;
         }
 
         public async Task<CategoriaModel> UpdateCategoria(CategoriaCriacaoDto categoriaDto)
         {
-            var categoriaExistente = await _context.Categorias.FindAsync(categoriaDto.id_categoria);
+            var categoriaExistente = await context.Categorias.FindAsync(categoriaDto.Id_categoria);
             if (categoriaExistente != null)
             {
-                categoriaExistente.nome_categoria = categoriaDto.nome_categoria;
-                categoriaExistente.ativo = categoriaDto.ativo;
-                await _context.SaveChangesAsync();
+                categoriaExistente.Nome_categoria = categoriaDto.Nome_categoria;
+                categoriaExistente.Ativo = categoriaDto.Ativo;
+                await context.SaveChangesAsync();
             }
             return categoriaExistente;
         }
 
         public async Task<bool> AlterarStatus(int id)
         {
-            var categoria = await _context.Categorias.FindAsync(id);
+            var categoria = await context.Categorias.FindAsync(id);
             if (categoria != null)
             {
-                categoria.ativo = !categoria.ativo;
-                await _context.SaveChangesAsync();
+                categoria.Ativo = !categoria.Ativo;
+                await context.SaveChangesAsync();
                 return true;
             }
             return false;

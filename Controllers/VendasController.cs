@@ -44,14 +44,14 @@ namespace EllosPratas.Controllers
                 var carrinho = _carrinhoService.GetCarrinho();
                 vendaDto.Itens = carrinho.Itens.Select(i => new VendaItemDto
                 {
-                    id_produto = i.ProdutoId,
-                    quantidade = i.Quantidade,
-                    preco_venda = i.ValorUnitario
+                    Id_produto = i.ProdutoId,
+                    Quantidade = i.Quantidade,
+                    Preco_venda = i.ValorUnitario
                 }).ToList();
 
                 var vendaRegistrada = await _vendasService.RegistrarVenda(vendaDto);
                 // Retorna um JSON com o ID da venda e status de sucesso
-                return Ok(new { message = "Venda registrada com sucesso!", vendaId = vendaRegistrada.id_venda });
+                return Ok(new { message = "Venda registrada com sucesso!", vendaId = vendaRegistrada.Id_venda });
             }
             catch (System.Exception ex)
             {

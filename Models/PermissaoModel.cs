@@ -5,9 +5,9 @@ namespace EllosPratas.Models
     public class PermissaoModel
     {
         [Key]
-        public int id_permissao { get; set; } 
-        public required string nome_permissao { get; set; } 
-        public string? descricao { get; set; } 
+        public int Id_permissao { get; set; } 
+        public required string Nome_permissao { get; set; } 
+        public string? Descricao { get; set; } 
 
         public List<NivelAcessoPermissaoModel> NivelAcessoPermissoes { get; set; } = new List<NivelAcessoPermissaoModel>();
     }

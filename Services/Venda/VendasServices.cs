@@ -10,15 +10,8 @@ using System.Threading.Tasks;
 
 namespace EllosPratas.Services.Venda
 {
-    public class VendasServices : IVendasInterface
+    public class VendasServices(BancoContext context) : IVendasInterface
     {
-        private readonly BancoContext _context;
-
-        public VendasServices(BancoContext context)
-        {
-            _context = context;
-        }
-
         public async Task<List<ProdutoBuscaDto>> BuscarProdutoPorNome(string termoBusca)
         {
             if (string.IsNullOrWhiteSpace(termoBusca))
@@ -28,17 +21,17 @@ namespace EllosPratas.Services.Venda
 
             var termoBuscaLower = termoBusca.ToLower();
 
-            var produtos = await _context.Produtos
-                .Where(p => p.nome_produto.ToLower().Contains(termoBuscaLower) && p.ativo)
-                .OrderBy(p => p.nome_produto)
+            var produtos = await context.Produtos
+                .Where(p => p.Nome_produto.ToLower().Contains(termoBuscaLower) && p.Ativo)
+                .OrderBy(p => p.Nome_produto)
                 .Take(10) // Limita a 10 resultados para o autocomplete
                 .Select(p => new ProdutoBuscaDto
                 {
-                    id_produto = p.id_produto,
-                    nome_produto = p.nome_produto,
-                    valor_unitario = p.valor_unitario, // Adicionado para uso no front-end
+                    Id_produto = p.Id_produto,
+                    Nome_produto = p.Nome_produto,
+                    Valor_unitario = p.Valor_unitario, // Adicionado para uso no front-end
                     // Converte a imagem para Base64 se ela existir, pronta para ser usada no src de uma <img>
-                    ImagemBase64 = p.imagem != null ? $"data:image/png;base64,{Convert.ToBase64String(p.imagem)}" : null
+                    ImagemBase64 = p.Imagem != null ? $"data:image/png;base64,{Convert.ToBase64String(p.imagem)}" : null
                 })
                 .ToListAsync();
 
@@ -48,25 +41,25 @@ namespace EllosPratas.Services.Venda
         {
             // Usar uma transação garante que todas as operações (Venda, Estoque, Caixa)
             // sejam concluídas com sucesso. Se uma falhar, todas são revertidas.
-            using (var transaction = await _context.Database.BeginTransactionAsync())
+            using (var transaction = await context.Database.BeginTransactionAsync())
             {
                 try
                 {
                     if (dto.Itens == null || !dto.Itens.Any())
                         throw new Exception("A venda precisa ter pelo menos um item.");
 
-                    if (dto.id_caixa <= 0)
+                    if (dto.Id_caixa <= 0)
                         throw new Exception("Caixa inválido. Por favor, abra o caixa antes de registrar vendas.");
 
                     // 1. Criar a Venda
                     var novaVenda = new VendasModel
                     {
-                        id_loja = dto.id_loja,
-                        id_caixa = dto.id_caixa,
-                        id_funcionario = dto.id_funcionario,
-                        id_cliente = dto.id_cliente,
-                        data_venda = DateTime.Now,
-                        valor_desconto = dto.valor_desconto,
+                        Id_loja = dto.Id_loja,
+                        Id_caixa = dto.Id_caixa,
+                        Id_funcionario = dto.Id_funcionario,
+                        Id_cliente = dto.Id_cliente,
+                        Data_venda = DateTime.Now,
+                        Valor_desconto = dto.Valor_desconto,
                         Itens = new List<ItensVendaModel>()
                     };
 
@@ -75,115 +68,112 @@ namespace EllosPratas.Services.Venda
                     // 2. Processar Itens e Atualizar Estoque
                     foreach (var itemDto in dto.Itens)
                     {
-                        var produto = await _context.Produtos.FindAsync(itemDto.id_produto);
-                        if (produto == null) throw new Exception($"Produto com ID {itemDto.id_produto} não encontrado.");
+                        var produto = await context.Produtos.FindAsync(itemDto.Id_produto);
+                        if (produto == null) throw new Exception($"Produto com ID {itemDto.Id_produto} não encontrado.");
 
-                        var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.id_produto == itemDto.id_produto);
-                        if (estoque == null || estoque.quantidade < itemDto.quantidade)
-                            throw new Exception($"Estoque insuficiente para o produto '{produto.nome_produto}'.");
+                        var estoque = await context.Estoque.FirstOrDefaultAsync(e => e.Id_produto == itemDto.Id_produto);
+                        if (estoque == null || estoque.Quantidade < itemDto.Quantidade)
+                            throw new Exception($"Estoque insuficiente para o produto '{produto.Nome_produto}'.");
 
                         // Abater do estoque
-                        estoque.quantidade -= itemDto.quantidade;
-                        _context.Estoque.Update(estoque);
+                        estoque.Quantidade -= itemDto.Quantidade;
+                        context.Estoque.Update(estoque);
 
-                        var subtotal = itemDto.quantidade * produto.valor_unitario / 100;
+                        var subtotal = itemDto.Quantidade * produto.Valor_unitario / 100;
                         valorTotalCalculado += subtotal;
 
                         novaVenda.Itens.Add(new ItensVendaModel
                         {
-                            id_produto = itemDto.id_produto,
-                            quantidade = itemDto.quantidade,
-                            valor_unitario = produto.valor_unitario / 100,
-                            valor_total = subtotal
+                            Id_produto = itemDto.Id_produto,
+                            Quantidade = itemDto.Quantidade,
+                            Valor_unitario = produto.Valor_unitario / 100,
+                            Valor_total = subtotal
                         });
                     }
-                    novaVenda.valor_total = valorTotalCalculado;
+                    novaVenda.Valor_total = valorTotalCalculado;
 
-                    _context.Vendas.Add(novaVenda);
-                    await _context.SaveChangesAsync(); // Salva a venda para obter o ID da venda
+                    context.Vendas.Add(novaVenda);
+                    await context.SaveChangesAsync(); // Salva a venda para obter o ID da venda
 
                     // 3. Criar o Pagamento associado à Venda
                     var novoPagamento = new PagamentoModel
                     {
-                        id_venda = novaVenda.id_venda,
-                        id_forma_pagamento = dto.id_forma_pagamento,
-                        valor_pago = novaVenda.valor_total - novaVenda.valor_desconto,
-                        quantidade_parcelas = dto.quantidade_parcela,
+                        Id_venda = novaVenda.Id_venda,
+                        Id_forma_pagamento = dto.Id_forma_pagamento,
+                        Valor_pago = novaVenda.Valor_total - novaVenda.Valor_desconto,
+                        Quantidade_parcelas = dto.Quantidade_parcela,
                         // Adicionar outros campos de pagamento conforme necessário
                     };
-                    _context.Pagamentos.Add(novoPagamento);
+                    context.Pagamentos.Add(novoPagamento);
 
                     // 4. Registrar a Entrada no Caixa
                     var movimentacao = new MovimentacaoCaixaModel
                     {
-                        id_caixa = dto.id_caixa,
-                        tipo = "Entrada",
-                        descricao = $"Venda #{novaVenda.id_venda}",
-                        valor = novoPagamento.valor_pago,
-                        data_movimento = DateTime.Now
+                        Id_caixa = dto.Id_caixa,
+                        Tipo = "Entrada",
+                        Descricao = $"Venda #{novaVenda.Id_venda}",
+                        Valor = novoPagamento.Valor_pago,
+                        Data_movimento = DateTime.Now
                     };
-                    _context.MovimentacaoCaixa.Add(movimentacao);
+                    context.MovimentacaoCaixa.Add(movimentacao);
 
-                    // Salva todas as alterações pendentes (Estoque, Pagamento, Caixa)
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
 
-                    // Se tudo correu bem, confirma a transação
                     await transaction.CommitAsync();
 
                     return novaVenda;
                 }
                 catch (Exception)
                 {
-                    // Se algo deu errado, desfaz todas as operações
                     await transaction.RollbackAsync();
-                    throw; // Propaga a exceção para ser tratada pelo Controller
+                    throw; 
                 }
             }
         }
 
         public async Task<List<VendasModel>> GetVendas()
         {
-            return await _context.Vendas
+            return await context.Vendas
                 .Include(venda => venda.Itens)
                     .ThenInclude(item => item.Produto)
                 .Include(venda => venda.Pagamento)
                 .Include(venda => venda.Cliente)
                 .Include(venda => venda.Funcionario)
-                .OrderByDescending(venda => venda.data_venda)
+                .OrderByDescending(venda => venda.Data_venda)
                 .ToListAsync();
         }
 
         public async Task<VendasModel> GetVendaPorId(int id)
         {
-            return await _context.Vendas
+            return await context.Vendas
                 .Include(v => v.Itens).ThenInclude(i => i.Produto)
                 .Include(v => v.Pagamento).ThenInclude(p => p.Desconto)
                 .Include(v => v.Cliente)
                 .Include(v => v.Funcionario)
-                .FirstOrDefaultAsync(v => v.id_venda == id);
+                .FirstOrDefaultAsync(v => v.Id_venda == id);
         }
 
         public Task<List<VendasModel>> GeraRelatorioVendas(DateTime dataInicio, DateTime dataFim)
         {
-            return _context.Vendas
-               .Where(v => v.data_venda >= dataInicio && v.data_venda <= dataFim)
+            return context.Vendas
+               .Where(v => v.Data_venda >= dataInicio && v.Data_venda <= dataFim)
                .Include(v => v.Itens).ThenInclude(i => i.Produto)
                .Include(v => v.Pagamento)
-               .OrderByDescending(v => v.data_venda)
+               .OrderByDescending(v => v.Data_venda)
                .ToListAsync();
         }
 
         public async Task<List<DescontoDto>> ListarDescontos()
         {
-            return await _context.Descontos
-                .Where(d => d.ativo_desconto) // Lista apenas descontos ativos
+            return await context.Descontos
+                .Where(d => d.Ativo_desconto) // Lista apenas descontos ativos
                 .Select(d => new DescontoDto
                 {
                     // Usar os nomes corretos das propriedades do DescontoModel
-                    Id = d.id_desconto,
-                    Nome = d.nome_desconto,
-                    Tipo = d.tipo_desconto,
-                    Valor = d.valor_desconto
+                    Id = d.Id_desconto,
+                    Nome = d.Nome_desconto,
+                    Tipo = d.Tipo_desconto,
+                    Valor = d.Valor_desconto
                 })
                 .ToListAsync();
         }
@@ -193,22 +183,22 @@ namespace EllosPratas.Services.Venda
             var desconto = new DescontoModel
             {
                 // Usar os nomes corretos das propriedades do DescontoModel
-                nome_desconto = dto.Nome,
-                tipo_desconto = dto.Tipo,
-                valor_desconto = dto.Valor,
-                ativo_desconto = true
+                Nome_desconto = dto.Nome,
+                Tipo_desconto = dto.Tipo,
+                Valor_desconto = dto.Valor,
+                Ativo_desconto = true
             };
 
-            _context.Descontos.Add(desconto);
-            await _context.SaveChangesAsync();
+            context.Descontos.Add(desconto);
+            await context.SaveChangesAsync();
 
             // Retorna o DTO com os dados do objeto que acabou de ser salvo
             return new DescontoDto
             {
-                Id = desconto.id_desconto,
-                Nome = desconto.nome_desconto,
-                Tipo = desconto.tipo_desconto,
-                Valor = desconto.valor_desconto
+                Id = desconto.Id_desconto,
+                Nome = desconto.Nome_desconto,
+                Tipo = desconto.Tipo_desconto,
+                Valor = desconto.Valor_desconto
             };
         }
 
@@ -220,24 +210,24 @@ namespace EllosPratas.Services.Venda
 
         public async Task<List<FormaPagamentoModel>> ListarFormasPagamento()
         {
-            return await _context.FormaPagamento.OrderBy(fp => fp.nome_forma).ToListAsync();
+            return await context.FormaPagamento.OrderBy(fp => fp.Nome_forma).ToListAsync();
         }
 
         public async Task<FormaPagamentoModel> CadastrarFormaPagamento(FormaPagamentoDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.nome_forma))
+            if (string.IsNullOrWhiteSpace(dto.Nome_forma))
             {
                 throw new ArgumentException("O nome da forma de pagamento é obrigatório.");
             }
 
             var novaForma = new FormaPagamentoModel
             {
-                nome_forma = dto.nome_forma,
-                descricao = dto.descricao
+                Nome_forma = dto.Nome_forma,
+                Descricao = dto.Descricao
             };
 
-            _context.FormaPagamento.Add(novaForma);
-            await _context.SaveChangesAsync();
+            context.FormaPagamento.Add(novaForma);
+            await context.SaveChangesAsync();
 
             return novaForma;
         }

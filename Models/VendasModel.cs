@@ -6,30 +6,30 @@ namespace EllosPratas.Models
     public class VendasModel
     {
         [Key]
-        public int id_venda { get; set; }
-        public int id_loja { get; set; }
-        public int id_caixa { get; set; }
-        public int? id_cliente { get; set; }
-        public int id_funcionario { get; set; }
-        public DateTime data_venda { get; set; }
-        public decimal valor_total { get; set; }
+        public int Id_venda { get; set; }
+        public int Id_loja { get; set; }
+        public int Id_caixa { get; set; }
+        public int? Id_cliente { get; set; }
+        public int Id_funcionario { get; set; }
+        public DateTime Data_venda { get; set; }
+        public decimal Valor_total { get; set; }
 
-        public decimal valor_desconto { get; set; }
+        public decimal Valor_desconto { get; set; }
 
         // --- PROPRIEDADES DE NAVEGAÇÃO ---
         public virtual List<ItensVendaModel> Itens { get; set; } = new List<ItensVendaModel>();
-        public virtual PagamentoModel Pagamento { get; set; }
+        public virtual PagamentoModel? Pagamento { get; set; }
 
-        [ForeignKey("id_loja")]
-        public virtual LojaModel Loja { get; set; }
+        [ForeignKey("Id_loja")]
+        public virtual LojaModel? Loja { get; set; }
 
-        [ForeignKey("id_caixa")]
-        public virtual CaixaModel Caixa { get; set; }
+        [ForeignKey("Id_caixa")]
+        public virtual CaixaModel? Caixa { get; set; }
 
-        [ForeignKey("id_cliente")]
+        [ForeignKey("Id_cliente")]
         public virtual ClienteModel? Cliente { get; set; }
 
-        [ForeignKey("id_funcionario")]
-        public virtual FuncionarioModel Funcionario { get; set; }
+        [ForeignKey("Id_funcionario")]
+        public virtual FuncionarioModel? Funcionario { get; set; }
     }
 }

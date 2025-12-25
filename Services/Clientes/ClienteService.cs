@@ -6,58 +6,53 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-public class ClienteService : IClientesInterface {
-    private readonly BancoContext _context;
-
-    public ClienteService(BancoContext context) {
-        _context = context;
-    }
-
+public class ClienteService(BancoContext context) : IClientesInterface {
+    
     public async Task<IEnumerable<ClienteModel>> GetClientes() {
-        return await _context.Clientes.AsNoTracking().ToListAsync();
+        return await context.Clientes.AsNoTracking().ToListAsync();
     }
 
     public async Task<ClienteModel> GetClientePorId(int id) {
-        return await _context.Clientes.FindAsync(id);
+        return await context.Clientes.FindAsync(id);
     }
 
     public async Task CadastrarCliente(ClienteDto clienteDto) {
 
         // VERIFICAÇÃO DE DUPLICIDADE ANTES DE INSERIR
-        if (await _context.Clientes.AnyAsync(c => c.cpf == clienteDto.cpf || c.email == clienteDto.email)) {
+        if (await context.Clientes.AnyAsync(c => c.Cpf == clienteDto.Cpf || c.Email == clienteDto.Email)) {
             // Lança uma exceção com uma mensagem clara
             throw new InvalidOperationException("Já existe um cliente cadastrado com este CPF ou E-mail.");
         }
 
         var cliente = new ClienteModel {
-            nome_cliente = clienteDto.nome_cliente,
-            email = clienteDto.email,
-            telefone = clienteDto.telefone,
-            cpf = clienteDto.cpf,
-            ativo = clienteDto.ativo,
-            data_cadastro = DateTime.Now
+            Nome_cliente = clienteDto.Nome_cliente,
+            Email = clienteDto.Email,
+            Telefone = clienteDto.Telefone,
+            Cpf = clienteDto.Cpf,
+            Ativo = clienteDto.Ativo,
+            Data_cadastro = DateTime.Now
         };
 
-        _context.Clientes.Add(cliente);
-        await _context.SaveChangesAsync();
+        context.Clientes.Add(cliente);
+        await context.SaveChangesAsync();
     }
 
     public async Task AtualizarCliente(ClienteDto clienteDto) {
         // VERIFICAÇÃO DE DUPLICIDADE ANTES DE ATUALIZAR
-        if (await _context.Clientes.AnyAsync(c => (c.cpf == clienteDto.cpf || c.email == clienteDto.email) && c.id_cliente != clienteDto.id_cliente)) {
+        if (await context.Clientes.AnyAsync(c => (c.Cpf == clienteDto.Cpf || c.Email == clienteDto.Email) && c.Id_cliente != clienteDto.Id_cliente)) {
             throw new InvalidOperationException("Já existe outro cliente cadastrado com este CPF ou E-mail.");
         }
 
-        var cliente = await _context.Clientes.FindAsync(clienteDto.id_cliente);
+        var cliente = await context.Clientes.FindAsync(clienteDto.Id_cliente);
         if (cliente != null) {
-            cliente.nome_cliente = clienteDto.nome_cliente;
-            cliente.email = clienteDto.email;
-            cliente.telefone = clienteDto.telefone;
-            cliente.cpf = clienteDto.cpf;
-            cliente.ativo = clienteDto.ativo;
+            cliente.Nome_cliente = clienteDto.Nome_cliente;
+            cliente.Email = clienteDto.Email;
+            cliente.Telefone = clienteDto.Telefone;
+            cliente.Cpf = clienteDto.Cpf;
+            cliente.Ativo = clienteDto.Ativo;
 
-            _context.Update(cliente);
-            await _context.SaveChangesAsync();
+            context.Update(cliente);
+            await context.SaveChangesAsync();
         }
     }
 }

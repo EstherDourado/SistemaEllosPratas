@@ -6,9 +6,9 @@ namespace EllosPratas.Models
     public class FormaPagamentoModel
     {
         [Key]
-        public int id_forma_pagamento { get; set; }
-        public required string nome_forma { get; set; } 
-        public string? descricao { get; set; }
+        public int Id_forma_pagamento { get; set; }
+        public required string Nome_forma { get; set; } 
+        public string? Descricao { get; set; }
 
         //[ForeignKey("id_nivel_acesso")]
         //public NivelAcessoModel NivelAcesso { get; set; }
