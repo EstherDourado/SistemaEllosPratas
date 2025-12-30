@@ -1,5 +1,6 @@
 ﻿using EllosPratas.Data;
-using EllosPratas.Dto;
+using EllosPratas.Dto.Loja.Entrada;
+using EllosPratas.Dto.Loja.Saida;
 using EllosPratas.Models;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,13 +1,9 @@
 ﻿using EllosPratas.Data;
-using EllosPratas.Dto;
-using EllosPratas.Dto.Produto;
+using EllosPratas.Dto.Produtos.Saida;
+using EllosPratas.Dto.Venda.Entrada;
+using EllosPratas.Dto.Venda.Saida;
 using EllosPratas.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace EllosPratas.Services.Venda
 {
     public class VendasServices(BancoContext context) : IVendasInterface
@@ -31,7 +27,7 @@ namespace EllosPratas.Services.Venda
                     Nome_produto = p.Nome_produto,
                     Valor_unitario = p.Valor_unitario, // Adicionado para uso no front-end
                     // Converte a imagem para Base64 se ela existir, pronta para ser usada no src de uma <img>
-                    ImagemBase64 = p.Imagem != null ? $"data:image/png;base64,{Convert.ToBase64String(p.imagem)}" : null
+                    ImagemBase64 = p.Imagem != null ? $"data:image/png;base64,{Convert.ToBase64String(p.Imagem)}" : null
                 })
                 .ToListAsync();
 

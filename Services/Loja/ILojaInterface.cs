@@ -1,4 +1,5 @@
-﻿using EllosPratas.Dto;
+﻿using EllosPratas.Dto.Loja.Entrada;
+using EllosPratas.Dto.Loja.Saida;
 using EllosPratas.Models;
 
 namespace EllosPratas.Services.Loja

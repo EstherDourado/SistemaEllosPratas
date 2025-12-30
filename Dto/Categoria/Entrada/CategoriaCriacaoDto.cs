@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EllosPratas.Dto
+namespace EllosPratas.Dto.Categoria.Entrada
 {
     public class CategoriaCriacaoDto
     {

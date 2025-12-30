@@ -1,5 +1,6 @@
-﻿using EllosPratas.Dto;
-using EllosPratas.Dto.Produto;
+﻿using EllosPratas.Dto.Produtos.Saida;
+using EllosPratas.Dto.Venda.Entrada;
+using EllosPratas.Dto.Venda.Saida;
 using EllosPratas.Models; // Supondo que VendaModel esteja neste namespace
 using System.Threading.Tasks;
 

@@ -1,4 +1,4 @@
-﻿using EllosPratas.Dto;
+﻿using EllosPratas.Dto.Funcionarios.Entrada;
 using EllosPratas.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;

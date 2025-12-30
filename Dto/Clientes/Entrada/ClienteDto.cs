@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EllosPratas.Dto {
+namespace EllosPratas.Dto.Clientes.Entrada {
     public class ClienteDto {
         public int Id_cliente { get; set; }
 

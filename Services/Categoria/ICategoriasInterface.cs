@@ -1,4 +1,4 @@
-﻿using EllosPratas.Dto;
+﻿using EllosPratas.Dto.Categoria.Entrada;
 using EllosPratas.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -1,9 +1,7 @@
 ﻿using EllosPratas.Data;
-using EllosPratas.Dto;
+using EllosPratas.Dto.Categoria.Entrada;
 using EllosPratas.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace EllosPratas.Services.Categoria
 {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EllosPratas.Dto {
+namespace EllosPratas.Dto.Funcionarios.Entrada {
     public class FuncionarioDto {
         public int Id_funcionario { get; set; }
 

@@ -1,10 +1,7 @@
 ﻿using EllosPratas.Data;
-using EllosPratas.Dto;
+using EllosPratas.Dto.Funcionarios.Entrada;
 using EllosPratas.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 public class FuncionarioService(BancoContext context) : IFuncionariosInterface {
    

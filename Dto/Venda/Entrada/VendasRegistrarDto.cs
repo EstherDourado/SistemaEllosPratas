@@ -1,13 +1,5 @@
-﻿namespace EllosPratas.Dto
+﻿namespace EllosPratas.Dto.Venda.Entrada
 {
-
-    public class VendaItemDto
-    {
-        public int Id_produto { get; set; }
-        public int Quantidade { get; set; }
-        public decimal Preco_venda { get; set; }
-    }
-
     public class VendasRegistrarDto
     {
     
@@ -24,7 +16,5 @@
         public int Quantidade_parcela { get; set; }
         public decimal Valor_parcela { get; set; }
         public DateTime Data_venda { get; set; }
-
-       public required List<VendaItemDto> Itens { get; set; }
     }
 }

@@ -29,6 +29,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Dto\Categoria\Saida\" />
+    <Folder Include="Dto\Clientes\Saida\" />
+    <Folder Include="Dto\Funcionarios\Saida\" />
     <Folder Include="wwwroot\Imagens\" />
   </ItemGroup>
 

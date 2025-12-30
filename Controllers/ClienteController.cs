@@ -1,4 +1,4 @@
-﻿using EllosPratas.Dto;
+﻿using EllosPratas.Dto.Clientes.Entrada;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 

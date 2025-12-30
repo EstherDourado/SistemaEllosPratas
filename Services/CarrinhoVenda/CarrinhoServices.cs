@@ -1,4 +1,5 @@
-﻿using EllosPratas.Dto;
+﻿using EllosPratas.Dto.CarrinhoVenda.Saida;
+using EllosPratas.Dto.CarrinhoVenda.Entrada;
 using Newtonsoft.Json;
 
 namespace EllosPratas.Services.CarrinhoVenda

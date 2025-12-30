@@ -1,4 +1,4 @@
-﻿using EllosPratas.Dto;
+﻿using EllosPratas.Dto.CarrinhoVenda.Saida;
 
 namespace EllosPratas.Services.CarrinhoVenda
 {

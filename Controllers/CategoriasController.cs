@@ -1,4 +1,4 @@
-﻿using EllosPratas.Dto;
+﻿using EllosPratas.Dto.Categoria.Entrada;
 using EllosPratas.Services.Categoria; // Certifique-se que o using está correto
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;

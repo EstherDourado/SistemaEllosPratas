@@ -1,5 +1,6 @@
 ﻿using EllosPratas.Data;
-using EllosPratas.Dto;
+using EllosPratas.Dto.Loja.Entrada;
+using EllosPratas.Dto.Loja.Saida;
 using EllosPratas.Services.Loja;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

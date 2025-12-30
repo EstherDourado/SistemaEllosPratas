@@ -1,4 +1,4 @@
-﻿namespace EllosPratas.Dto
+﻿namespace EllosPratas.Dto.Venda.Saida
 {
     
     public class DescontoDto

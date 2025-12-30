@@ -1,17 +1,12 @@
 ﻿using EllosPratas.Data;
-using EllosPratas.Dto;
-using EllosPratas.Dto.Produto;
+using EllosPratas.Dto.Produtos.Entrada;
+using EllosPratas.Dto.Produtos.Saida;
 using EllosPratas.Models;
 using Microsoft.EntityFrameworkCore;
-using System.IO;
-using System.Linq;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace EllosPratas.Services.Produtos
 {
-    public class ProdutosService(BancoContext _context) : IProdutosInterface
+    public class ProdutosService(BancoContext context) : IProdutosInterface
     {
         public async Task<ProdutosModel> CadastrarProduto(ProdutosCriacaoDto produtosCriacaoDto, IFormFile? imagem)
         {
@@ -34,8 +29,8 @@ namespace EllosPratas.Services.Produtos
                 }
             }
 
-            _context.Produtos.Add(produto);
-            await _context.SaveChangesAsync();
+            context.Produtos.Add(produto);
+            await context.SaveChangesAsync();
 
             var estoque = new EstoqueModel
             {
@@ -44,44 +39,44 @@ namespace EllosPratas.Services.Produtos
                 //quantidade_entrada = produtosCriacaoDto.quantidade, 
                 //data_entrada = DateTime.Now       
             };
-            _context.Estoque.Add(estoque);
-            await _context.SaveChangesAsync();
+            context.Estoque.Add(estoque);
+            await context.SaveChangesAsync();
 
             produto.Estoque = estoque;
             return produto;
         }
 
         // Alterado: O método agora recebe o DTO com a imagem dentro
-        public async Task<ProdutosModel> AtualizarProduto(ProdutosEdicaoDto produtosEdicaoDto)
+        public async Task<ProdutosModel> AtualizarProduto(ProdutosCriacaoDto produtosEdicaoDto)
         {
-            var produtoExistente = await _context.Produtos.Include(p => p.Estoque).FirstOrDefaultAsync(p => p.id_produto == produtosEdicaoDto.id_produto);
+            var produtoExistente = await context.Produtos.Include(p => p.Estoque).FirstOrDefaultAsync(p => p.Id_produto == produtosEdicaoDto.Id_produto);
             if (produtoExistente == null) throw new Exception("Produto não encontrado.");
 
-            produtoExistente.nome_produto = produtosEdicaoDto.Nome_produto;
-            produtoExistente.descricao = produtosEdicaoDto.Descricao;
-            produtoExistente.valor_unitario = produtosEdicaoDto.Valor_unitario;
-            produtoExistente.id_categoria = produtosEdicaoDto.Id_categoria;
-            produtoExistente.ativo = produtosEdicaoDto.Ativo;
+            produtoExistente.Nome_produto = produtosEdicaoDto.Nome_produto;
+            produtoExistente.Descricao = produtosEdicaoDto.Descricao;
+            produtoExistente.Valor_unitario = produtosEdicaoDto.Valor_unitario;
+            produtoExistente.Id_categoria = produtosEdicaoDto.Id_categoria;
+            produtoExistente.Ativo = produtosEdicaoDto.Ativo;
 
             // A lógica de conversão da imagem agora usa a propriedade do DTO
             if (produtosEdicaoDto.Imagem != null && produtosEdicaoDto.Imagem.Length > 0)
             {
                 using var memoryStream = new MemoryStream();
                 await produtosEdicaoDto.Imagem.CopyToAsync(memoryStream);
-                produtoExistente.imagem = memoryStream.ToArray();
+                produtoExistente.Imagem = memoryStream.ToArray();
             }
 
             if (produtoExistente.Estoque != null)
             {
-                produtoExistente.Estoque.quantidade = produtosEdicaoDto.Quantidade;
+                produtoExistente.Estoque.Quantidade = produtosEdicaoDto.Quantidade;
             }
             else
             {
-                var novoEstoque = new EstoqueModel { Id_produto = produtoExistente.id_produto, Quantidade = produtosEdicaoDto.Quantidade };
-                _context.Estoque.Add(novoEstoque);
+                var novoEstoque = new EstoqueModel { Id_produto = produtoExistente.Id_produto, Quantidade = produtosEdicaoDto.Quantidade };
+                context.Estoque.Add(novoEstoque);
             }
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return produtoExistente;
         }
 
@@ -95,7 +90,7 @@ namespace EllosPratas.Services.Produtos
 
         public async Task<FiltroProdutosResultadoDto> FiltrarProdutos(ProdutoFiltroDto filtro)
         {
-            IQueryable<ProdutosModel> query = _context.Produtos.Include(p => p.Categoria).Include(p => p.Estoque);
+            IQueryable<ProdutosModel> query = context.Produtos.Include(p => p.Categoria).Include(p => p.Estoque);
             if (!string.IsNullOrWhiteSpace(filtro.Nome))
             {
                 var termoNormalizado = NormalizarString(filtro.Nome);
@@ -111,38 +106,38 @@ namespace EllosPratas.Services.Produtos
             }
             var totalProdutos = await query.CountAsync();
             var produtosPaginados = await query.OrderByDescending(p => p.Id_produto).Skip((filtro.Pagina - 1) * filtro.ItensPorPagina).Take(filtro.ItensPorPagina).ToListAsync();
-            var categoriasComProdutos = produtosPaginados.GroupBy(p => p.Categoria).Select(g => new CategoriaComProdutosDto { IdCategoria = g.Key.Id_categoria, NomeCategoria = g.Key.Nome_categoria, Produtos = g.Select(p => new ProdutoListagemDto { Id_produto = p.Id_produto, Nome_produto = p.Nome_produto, Descricao = p.Descricao, Valor_unitario = p.Valor_unitario / 100, Ativo = p.Ativo, Quantidade = p.Estoque?.Quantidade ?? 0, ImagemBase64 = p.Imagem != null ? Convert.ToBase64String(p.Imagem) : null }).ToList() }).OrderBy(c => c.nomeCategoria).ToList();
+            var categoriasComProdutos = produtosPaginados.GroupBy(p => p.Categoria).Select(g => new CategoriaComProdutosDto { IdCategoria = g.Key.Id_categoria, NomeCategoria = g.Key.Nome_categoria, Produtos = g.Select(p => new ProdutoListagemDto { Id_produto = p.Id_produto, Nome_produto = p.Nome_produto, Descricao = p.Descricao, Valor_unitario = p.Valor_unitario / 100, Ativo = p.Ativo, Quantidade = p.Estoque?.Quantidade ?? 0, ImagemBase64 = p.Imagem != null ? Convert.ToBase64String(p.Imagem) : null }).ToList() }).OrderBy(c => c.NomeCategoria).ToList();
             return new FiltroProdutosResultadoDto { Categorias = categoriasComProdutos, TotalProdutos = totalProdutos, PaginaAtual = filtro.Pagina, TotalPaginas = (int)Math.Ceiling(totalProdutos / (double)filtro.ItensPorPagina) };
         }
 
         public async Task<bool> DeletarProduto(int id)
         {
-            var produto = await _context.Produtos.FindAsync(id);
+            var produto = await context.Produtos.FindAsync(id);
             if (produto == null) return false;
 
-            var temVendas = await _context.ItensVenda.AnyAsync(i => i.Id_produto == id);
+            var temVendas = await context.ItensVenda.AnyAsync(i => i.Id_produto == id);
             if (temVendas) throw new Exception("Produto não pode ser deletado: possui vendas associadas.");
             
-            var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.Id_produto == id);
-            if (estoque != null) _context.Estoque.Remove(estoque);
+            var estoque = await context.Estoque.FirstOrDefaultAsync(e => e.Id_produto == id);
+            if (estoque != null) context.Estoque.Remove(estoque);
 
-            _context.Produtos.Remove(produto);
-            await _context.SaveChangesAsync();
+            context.Produtos.Remove(produto);
+            await context.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> AlterarStatusProduto(int id)
         {
-            var produtoDb = await _context.Produtos.FindAsync(id);
+            var produtoDb = await context.Produtos.FindAsync(id);
             if (produtoDb == null) throw new Exception("Produto não encontrado!");
             produtoDb.Ativo = !produtoDb.Ativo;
-            _context.Produtos.Update(produtoDb);
-            await _context.SaveChangesAsync();
+            context.Produtos.Update(produtoDb);
+            await context.SaveChangesAsync();
             return produtoDb.Ativo;
         }
 
-        public async Task<List<ProdutosModel>> GetProdutos() => await _context.Produtos.Include(p => p.Estoque).ToListAsync();
-        public async Task<ProdutosModel> GetProdutoPorId(int id) => await _context.Produtos.Include(p => p.Estoque).FirstOrDefaultAsync(p => p.Id_produto == id);
+        public async Task<List<ProdutosModel>> GetProdutos() => await context.Produtos.Include(p => p.Estoque).ToListAsync();
+        public async Task<ProdutosModel> GetProdutoPorId(int id) => await context.Produtos.Include(p => p.Estoque).FirstOrDefaultAsync(p => p.Id_produto == id);
         
     }
 }

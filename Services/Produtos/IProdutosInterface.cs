@@ -1,9 +1,6 @@
-﻿using EllosPratas.Dto;
-using EllosPratas.Dto.Produto;
+﻿using EllosPratas.Dto.Produtos.Saida;
+using EllosPratas.Dto.Produtos.Entrada;
 using EllosPratas.Models;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace EllosPratas.Services.Produtos
 {
@@ -12,7 +9,7 @@ namespace EllosPratas.Services.Produtos
         Task<ProdutosModel> CadastrarProduto(ProdutosCriacaoDto produtosCriacaoDto, IFormFile? imagem);
         Task<List<ProdutosModel>> GetProdutos();
         Task<ProdutosModel> GetProdutoPorId(int id);
-        Task<ProdutosModel> AtualizarProduto(ProdutosEdicaoDto produtosEdicaoDto);
+        Task<ProdutosModel> AtualizarProduto(ProdutosCriacaoDto produtosEdicaoDto);
         Task<bool> AlterarStatusProduto(int id);
         Task<FiltroProdutosResultadoDto> FiltrarProdutos(ProdutoFiltroDto filtro);
         Task<bool> DeletarProduto(int id);

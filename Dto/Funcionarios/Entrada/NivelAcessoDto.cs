@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EllosPratas.Dto {
+namespace EllosPratas.Dto.Funcionarios.Entrada {
     public class NivelAcessoDto {
         public int id_nivel_acesso { get; set; }
 

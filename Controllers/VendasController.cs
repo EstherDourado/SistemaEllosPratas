@@ -1,4 +1,4 @@
-﻿using EllosPratas.Dto;
+﻿using EllosPratas.Dto.Venda.Entrada;
 using EllosPratas.Services.CarrinhoVenda;
 using EllosPratas.Services.Venda;
 using Microsoft.AspNetCore.Mvc;

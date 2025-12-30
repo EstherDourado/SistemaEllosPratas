@@ -1,4 +1,4 @@
-﻿namespace EllosPratas.Dto
+﻿namespace EllosPratas.Dto.CarrinhoVenda.Entrada
 {
     public class CarrinhoItemDto
     {
